@@ -27,7 +27,7 @@
 .product-image { transition-duration: .55s; }
 
 /* entrada suave de cada página ao navegar */
-main#conteudo { animation: page-in .9s var(--ease-out) both; }
+main#conteudo { animation: page-in .9s var(--ease-out) backwards; } /* backwards: sem transform depois da animação, senão o filtro "fixo" do celular fica preso dentro da página */
 @keyframes page-in { from { opacity: 0; transform: translateY(14px); } }
 
 /* ---------- WhatsApp flutuante: ícone maior ---------- */
