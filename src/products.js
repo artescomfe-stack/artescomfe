@@ -630,12 +630,34 @@ export const typeLabels = { maria: 'Nossa Senhora', santo: 'Santos', jesus: 'Jes
 export const typeKeys = { maria: 'nossa-senhora', santo: 'santos', jesus: 'jesus-cristo', familia: 'sagrada-familia' }
 export const lineLabels = { imagens: 'Imagens sacras', tercos: 'Terços', quadros: 'Quadros', presentes: 'Presentes' }
 
+// ---------- Categorias (painel → Categorias; tabela public.categories) ----------
+// Padrão = o mesmo que está no banco; o site usa este até o Supabase responder (ou se ele cair).
+// kind 'tipo' = devoção (menu, chips e filtro); kind 'colecao' = linha da loja (Imagens sacras, Quadros…).
+const DEFAULT_CATEGORIES = [
+  { slug: 'imagens-sacras', name: 'Imagens sacras', kind: 'colecao', sort_order: 10 },
+  { slug: 'quadros', name: 'Quadros e placas', kind: 'colecao', sort_order: 20, banner_image: '/img/banners/presentes-de-fe.webp', banner_eyebrow: 'Quadros e placas', banner_title: 'A fé em destaque\nna sua parede.', banner_text: 'Quadros e placas em relevo para abençoar a casa, o escritório ou presentear.' },
+  { slug: 'tercos', name: 'Terços', kind: 'colecao', sort_order: 30 },
+  { slug: 'presentes', name: 'Presentes', kind: 'colecao', sort_order: 40 },
+  { slug: 'nossa-senhora', name: 'Nossa Senhora', kind: 'tipo', sort_order: 50, home_card: true, home_card_order: 1, home_image: '/img/produtos/06-02-480.webp', banner_image: '/img/banners/colecao-nossa-senhora.webp', banner_eyebrow: 'Coleção Nossa Senhora', banner_title: 'Maria, Mãe\ne Rainha do lar.', banner_text: 'Diversas representações de Nossa Senhora para a sua devoção — Aparecida, Fátima, Guadalupe e muito mais.' },
+  { slug: 'santos', name: 'Santos', kind: 'tipo', sort_order: 60, home_card: true, home_card_order: 2, home_image: '/img/produtos/03-02-480.webp', banner_image: '/img/banners/santos.webp', banner_eyebrow: 'Santos', banner_title: 'Amigos de Deus,\nexemplos de fé.', banner_text: 'Imagens dos santos que intercedem por nós, com acabamentos ricos em detalhes.' },
+  { slug: 'jesus-cristo', name: 'Jesus Cristo', kind: 'tipo', sort_order: 70, home_card: true, home_card_order: 4, home_image: '/img/produtos/07-02-480.webp', banner_image: '/img/banners/jesus-cristo.webp', banner_eyebrow: 'Jesus Cristo', banner_title: 'O Caminho,\na Verdade e a Vida.', banner_text: 'Imagens para meditar a vida e a Paixão de Cristo e renovar a fé todos os dias.' },
+  { slug: 'sagrada-familia', name: 'Sagrada Família', kind: 'tipo', sort_order: 80, home_card: true, home_card_order: 3, home_image: '/img/produtos/08-02-480.webp', banner_image: '/img/banners/sagrada-familia.webp', banner_eyebrow: 'Sagrada Família', banner_title: 'Jesus, Maria\ne José.', banner_text: 'A família de Nazaré para abençoar o seu lar — linda o ano inteiro e especial no Natal.' },
+].map(c => ({ active: true, home_card: false, home_card_order: 0, ...c }))
+
+export const categories = [...DEFAULT_CATEGORIES]
+export const categoryBySlug = slug => categories.find(c => c.slug === slug)
+
+// Catálogo local (sem banco): categorias a partir do tipo e da linha antigos.
+const LINE_SLUG = { imagens: 'imagens-sacras', quadros: 'quadros', tercos: 'tercos', presentes: 'presentes' }
+const localSlugs = product => [LINE_SLUG[product.line || 'imagens'], typeKeys[product.type]].filter(Boolean)
+
 // Completa os campos calculados (slug, preços formatados, miniaturas…).
 // Serve tanto para o catálogo local acima quanto para o que vem do Supabase (src/data.js).
 const enrich = product => ({
   line: 'imagens',
   ...product,
   category: product.category || typeLabels[product.type],
+  categorySlugs: product.categorySlugs || localSlugs(product),
   slug: product.slug || slugify(product.name),
   oldPriceLabel: product.oldPrice ? formatPrice(product.oldPrice) : null,
   available: product.available !== false,
@@ -656,13 +678,29 @@ export function setProducts(list) {
   products.splice(0, products.length, ...availableFirst(list.map(enrich)))
 }
 
-export const collections = [
-  { key: 'todos', label: 'Todos os produtos', test: () => true },
-  { key: 'nossa-senhora', label: 'Nossa Senhora', test: p => p.type === 'maria' },
-  { key: 'santos', label: 'Santos', test: p => p.type === 'santo' },
-  { key: 'jesus-cristo', label: 'Jesus Cristo', test: p => p.type === 'jesus' },
-  { key: 'sagrada-familia', label: 'Sagrada Família', test: p => p.type === 'familia' },
-  { key: 'novidades', label: 'Novidades', test: p => p.isNew },
-]
+// Botões de categoria do catálogo: Todos + devoções + linhas (menos "Imagens sacras", que é quase tudo)
+// + Novidades. Ordem = a do painel → Categorias. A lista é viva: muda quando as categorias chegam do banco.
+export const collections = []
+const buildCollections = () => {
+  const sorted = categories.filter(c => c.active).sort((a, b) => a.sort_order - b.sort_order)
+  const pick = kind => sorted.filter(c => c.kind === kind && c.slug !== 'imagens-sacras')
+  collections.splice(0, collections.length,
+    { key: 'todos', label: 'Todos os produtos', test: () => true },
+    ...[...pick('tipo'), ...pick('colecao')].map(c => ({ key: c.slug, label: c.name, category: c, test: p => p.categorySlugs.includes(c.slug) })),
+    { key: 'novidades', label: 'Novidades', test: p => p.isNew },
+  )
+}
+buildCollections()
+
+export function setCategories(list) {
+  if (!list?.length) return
+  categories.splice(0, categories.length, ...list)
+  buildCollections()
+}
+
+// Card flutuante (painel → Flutuantes): até 5 produtos, na ordem escolhida; esgotados ficam de fora.
+export const spotlightProducts = () => store.spotlight?.enabled
+  ? (store.spotlight.ids || []).map(id => products.find(p => p.uuid === id || p.id === id)).filter(p => p?.available).slice(0, 5)
+  : []
 
 export const findProduct = slug => products.find(product => product.slug === slug)

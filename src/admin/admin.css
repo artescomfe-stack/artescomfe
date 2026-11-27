@@ -34,10 +34,10 @@
 .adm-sidebar { position: sticky; top: 0; width: var(--adm-sidebar); height: 100vh; display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--adm-line); background: var(--adm-surface); transition: transform .25s ease; }
 .adm-sidebar-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 16px 12px 14px 16px; }
 .adm-brand { display: flex; align-items: center; gap: 10px; }
-.adm-brand img { width: 84px; height: auto; }
+.adm-brand img { width: 38px; height: 38px; object-fit: contain; border-radius: 50%; } /* Artes com Fé: selo redondo (mesmo do Instagram) */
 .adm-brand span { padding: 3px 8px; border-radius: 999px; color: var(--adm-accent); background: var(--adm-soft); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .adm-sidebar-head .adm-icon-btn { color: var(--adm-muted); }
-.adm-brand-mark { display: none; width: 34px; height: 34px; place-items: center; border-radius: 10px; color: var(--adm-wine); background: var(--adm-soft); font-family: var(--serif); font-size: 20px; font-weight: 500; line-height: 1; }
+.adm-brand-mark { display: none; width: 34px; height: 34px; place-items: center; border-radius: 50%; color: var(--adm-wine); background: var(--adm-soft); font-family: var(--serif); font-size: 20px; font-weight: 500; line-height: 1; }
 
 /* Menu recolhido: faixa estreita só com os ícones (nome aparece ao passar o mouse) */
 @media (min-width: 961px) {
@@ -210,7 +210,7 @@
 /* ---------- Login ---------- */
 .adm-auth { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px 16px; background: radial-gradient(circle at 20% 0%, #f7e7db, transparent 55%), var(--adm-bg); }
 .adm-auth-card { width: min(400px, 100%); padding: 32px 28px; border: 1px solid var(--adm-line); border-radius: 16px; background: var(--adm-surface); box-shadow: 0 20px 60px rgba(67, 32, 26, .1); }
-.adm-auth-logo { width: 110px; margin: 0 auto 20px; }
+.adm-auth-logo { width: 96px; height: 96px; object-fit: contain; border-radius: 50%; margin: 0 auto 20px; }
 .adm-auth-card h1 { margin: 0 0 6px; color: var(--adm-wine); font-family: var(--serif); font-size: 26px; font-weight: 500; }
 .adm-auth-sub { margin: 0 0 22px; color: var(--adm-muted); }
 .adm-auth-card .adm-link { display: block; margin: 14px auto 0; }
@@ -937,3 +937,22 @@ a.adm-stat:hover { border-color: var(--adm-wine); }
   .adm-users th:nth-child(3), .adm-users td:nth-child(3) { display: none; }
   .adm-users th:nth-child(2), .adm-users td:nth-child(2) { width: 140px; }
 }
+
+/* ---------- Modais no celular: nada sai da tela ---------- */
+.adm-modal { min-width: 0; max-width: 100%; }
+.adm-modal-body { overflow-x: hidden; }
+@media (max-width: 600px) {
+  .adm-modal-root { padding: 8px; align-items: end; }
+  .adm-modal, .adm-modal.wide { width: 100%; max-height: calc(100dvh - 16px); border-radius: 14px; }
+  .adm-modal-head { padding: 12px 14px; }
+  .adm-modal-body { padding: 14px; }
+  .adm-modal-foot { flex-wrap: wrap; padding: 12px 14px; }
+  .adm-modal-foot > * { flex: 1 1 auto; justify-content: center; }
+  .adm-crop-stage { padding: 6px; }
+  .adm-crop-hint { font-size: 12.5px; }
+}
+
+/* Nome da loja ao lado do selo no menu do painel */
+.adm-brand::after { content: none; }
+.adm-brand b.adm-brand-name { color: var(--adm-wine); font-family: var(--serif); font-size: 17px; font-weight: 600; line-height: 1.1; }
+.adm.is-collapsed .adm-brand .adm-brand-name { display: none; }

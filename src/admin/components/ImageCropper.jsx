@@ -32,7 +32,11 @@ export default function ImageCropper({ src, aspect = 3 / 4, outputs, title = 'Aj
   const pinch = useRef(null)
 
   // tamanho da moldura na tela, respeitando a proporção
-  const frameW = Math.round(Math.min(FRAME_MAX_W, FRAME_MAX_H * aspect, typeof window !== 'undefined' ? window.innerWidth - 72 : FRAME_MAX_W))
+  // No celular a moldura cabe inteira na tela (desconta margens do modal, do corpo e do fundo xadrez,
+  // e a altura do cabeçalho, das dicas, do zoom e dos botões).
+  const vw = typeof window !== 'undefined' ? window.innerWidth : 1200
+  const vh = typeof window !== 'undefined' ? window.innerHeight : 900
+  const frameW = Math.max(160, Math.round(Math.min(FRAME_MAX_W, FRAME_MAX_H * aspect, vw - (vw < 600 ? 76 : 112), (vh - (vw < 600 ? 300 : 340)) * aspect)))
   const frameH = Math.round(frameW / aspect)
 
   useEffect(() => {

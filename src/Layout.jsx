@@ -46,7 +46,8 @@ function SearchBox({ onDone }) {
 }
 
 function BagDrawer() {
-  const { bagItems, bagOpen, closeBag, changeQuantity, removeFromBag } = useShop()
+  const { bagItems, bagOpen, closeBag, changeQuantity, removeFromBag, user, profile } = useShop()
+  const buyer = { name: profile?.full_name, email: user?.email, phone: profile?.phone }
   const total = bagItems.reduce((sum, { product, quantity }) => sum + product.price * quantity, 0)
   useEffect(() => {
     if (!bagOpen) return
@@ -90,7 +91,7 @@ function BagDrawer() {
             </ul>
             <div className="bag-foot">
               <p><span>Total estimado</span><strong>R$ {total.toFixed(2).replace('.', ',')}</strong></p>
-              <a className="button whatsapp" href={whatsappLink(bagMessage(bagItems))} target="_blank" rel="noreferrer"><WhatsApp /> Finalizar pelo WhatsApp</a>
+              <a className="button whatsapp" href={whatsappLink(bagMessage(bagItems, buyer))} target="_blank" rel="noreferrer"><WhatsApp /> Finalizar pelo WhatsApp</a>
               <small>O WhatsApp da Artes com Fé abre com a sua lista pronta. Lá combinamos pagamento, frete e entrega.</small>
             </div>
           </>

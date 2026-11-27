@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Eye, EyeOff, LockKeyhole, LogOut, MailCheck, ShieldAlert } from 'lucide-react'
 import { supabase } from '../supabase.js'
-import { logo } from '../ui.jsx'
+const logo = '/img/logo/perfil-instagram.webp' // selo redondo da Artes com Fé
 import { signOut } from './useAdminAuth.js'
 
 const friendlyError = message => {

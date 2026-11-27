@@ -2,13 +2,33 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Heart, ShoppingBag } from 'lucide-react'
 import { useShop } from './shop.jsx'
+import { helloMessage, store, whatsappLink } from './store.js'
+
+// Links escolhidos no painel: '/página' (dentro do site), 'https://…' (outro site, nova aba),
+// '{instagram}' (Instagram da loja) e '{whatsapp}' (conversa no WhatsApp da loja).
+export const resolveLink = link => link === '{instagram}' ? store.instagram : link === '{whatsapp}' ? whatsappLink(helloMessage) : link
+
+export function SmartLink({ to, className, children, fallback = '/produtos', ...rest }) {
+  const href = resolveLink(to) || fallback
+  if (/^(https?:|mailto:)/.test(href)) return <a className={className} href={href} target="_blank" rel="noreferrer" {...rest}>{children}</a>
+  return <Link className={className} to={href} {...rest}>{children}</Link>
+}
+
+// Texto com Enter → linhas com <br />. A última linha pode vir em itálico (<em>) nos títulos.
+export const Lines = ({ text, lastEm = false }) => {
+  const lines = String(text || '').split('\n')
+  return lines.map((line, i) => <React.Fragment key={i}>{i > 0 && <br />}{lastEm && i === lines.length - 1 && lines.length > 1 ? <em>{line}</em> : line}</React.Fragment>)
+}
 
 // Imagens otimizadas em /public/img. Cada banner tem duas versões (leve e grande); o navegador escolhe a ideal.
 export const logo = '/img/logo/emblema.webp'
 export const logoFull = '/img/logo/logo.webp'
 // Banners: hero 2400px (+ versão 1200px) · boxes 1600px (+ versão 800px)
-export const responsive = (image, small) =>
-  `${image.replace(/\.webp$/, `-${small}.webp`)} ${small}w, ${image} ${small === 1200 ? 2400 : 1600}w`
+// Fotos enviadas pelo painel seguem o mesmo padrão (nome.webp + nome-800.webp / -1200.webp).
+// Imagem sem versão leve (.jpg/.png ou foto de produto) volta sem srcSet.
+export const responsive = (image, small) => /^\/img\/banners\/|\/storage\/v1\/object\/public\/site\/(banners|categorias|paginas)\//.test(image || '') && /\.webp(\?.*)?$/.test(image)
+  ? `${image.replace(/\.webp(\?.*)?$/, `-${small}.webp$1`)} ${small}w, ${image} ${small === 1200 ? 2400 : 1600}w`
+  : undefined
 
 export function Instagram() {
   return (
@@ -43,14 +63,14 @@ export function Brand({ onClick, light = false, horizontal = false }) {
   if (horizontal) {
     return (
       <Link to="/" className="brand horizontal" aria-label="Artes com Fé, página inicial" onClick={onClick}>
-        <img src={logo} alt="" width="354" height="480" />
+        <img src={store.logo || logo} alt="" width="354" height="480" />
         <span className="brand-name">Artes com Fé<small>Arte Sacra • Devoção • Tradição</small></span>
       </Link>
     )
   }
   return (
     <Link to="/" className={`brand ${light ? 'light' : ''}`} aria-label="Artes com Fé, página inicial" onClick={onClick}>
-      <img src={light ? '/img/logo/logo-claro.webp' : logoFull} alt="Artes com Fé" width="495" height="840" />
+      <img src={light ? (store.logoFooter || '/img/logo/logo-claro.webp') : logoFull} alt="Artes com Fé" width="495" height="840" />
     </Link>
   )
 }

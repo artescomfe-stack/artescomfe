@@ -1,4 +1,5 @@
 // Configurações da loja — dados de contato e como as mensagens do WhatsApp são montadas.
+// Editadas no painel (/painel-loja → Configurações e Logo e rodapé).
 // As vendas são fechadas no WhatsApp: medidas, pagamento e entrega são combinados na conversa.
 // Os valores abaixo são o padrão; os oficiais vêm da tabela public.store_settings no Supabase
 // (src/data.js copia para cá assim que carrega — edite pelo painel do Supabase).
@@ -11,6 +12,12 @@ export const store = {
   instagram: 'https://www.instagram.com/artescomfe_/',
   instagramHandle: '@artescomfe_',
   installments: 2,
+  // Painel → Logo e rodapé / Flutuantes (store_settings). Vazio = padrão do site.
+  logo: null,
+  logoFooter: null,
+  social: [],
+  footerText: null,
+  spotlight: { enabled: false, ids: [] },
 }
 
 // Usa api.whatsapp.com direto: o atalho wa.me redireciona e, nesse redirecionamento,
@@ -24,19 +31,65 @@ export const whatsappLink = text => {
 
 const formatPrice = value => `R$ ${value.toFixed(2).replace('.', ',')}`
 
-export const productMessage = product =>
-  `Olá, Artes com Fé! 🙏 Vi no site e me encantei por esta imagem:\n\n` +
-  `*${product.name}* — ${product.priceLabel}\n\n` +
-  `Pode me passar as medidas e a disponibilidade? ✨`
+const SITE = 'artescomfe.com.br'
+const productUrl = product => `${SITE}/produto/${product.slug}`
+const phoneText = digits => {
+  const d = String(digits || '').replace(/\D/g, '').replace(/^55(?=\d{10,11}$)/, '')
+  return d.length >= 10 ? `(${d.slice(0, 2)}) ${d.slice(2, d.length - 4)}-${d.slice(-4)}` : ''
+}
+const productDetails = product => [
+  product.category && `• Categoria: ${product.category}`,
+  product.finish && `• Acabamento: ${product.finish}`,
+  product.dimensions && `• Medidas: ${product.dimensions}`,
+].filter(Boolean)
 
-// Mensagem de finalização da sacola.
-export const bagMessage = items => {
-  const lines = items.map(({ product, quantity }) =>
-    `${quantity > 1 ? `${quantity}x ` : ''}*${product.name}* — ${formatPrice(product.price * quantity)}`)
+export const productMessage = product => [
+  'Olá, Artes com Fé! 🙏 Vi no site e me encantei por esta imagem:',
+  '',
+  `*${product.name}*`,
+  ...productDetails(product),
+  `• Valor: ${product.priceLabel}`,
+  `🔗 ${productUrl(product)}`,
+  '',
+  'Pode me passar as medidas e a disponibilidade? ✨',
+].join('\n')
+
+// Mensagem de finalização da sacola (mesmo padrão da Maré).
+// buyer = { name, email, phone } de quem está logado (campos vazios não aparecem).
+export const bagMessage = (items, buyer = {}) => {
+  const now = new Date()
+  const when = `${now.toLocaleDateString('pt-BR')}, às ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+  const blocks = items.map(({ product, quantity }, i) => [
+    `*${i + 1}) ${product.name}*`,
+    ...productDetails(product),
+    `• Quantidade: ${quantity}`,
+    `• Valor: ${formatPrice(product.price * quantity)}${quantity > 1 ? ` (${product.priceLabel} cada)` : ''}`,
+    `🔗 ${productUrl(product)}`,
+  ].join('\n'))
   const total = items.reduce((sum, { product, quantity }) => sum + product.price * quantity, 0)
-  return `Olá, Artes com Fé! ✨\nMontei meu pedido no site:\n\n` +
-    `--------\n${lines.join('\n')}\nTotal: *${formatPrice(total)}*\n\n` +
-    `🙏 Pode me ajudar com a finalização e a entrega?`
+  const count = items.reduce((sum, { quantity }) => sum + quantity, 0)
+  const times = store.installments || 1
+  const buyerLines = [
+    buyer.name && `• Nome: ${buyer.name}`,
+    buyer.email && `• E-mail: ${buyer.email}`,
+    phoneText(buyer.phone) && `• WhatsApp: ${phoneText(buyer.phone)}`,
+  ].filter(Boolean)
+  return [
+    'Olá, Artes com Fé! 🙏 Acabei de montar meu pedido pelo site:',
+    '',
+    '🛍️ *MEU PEDIDO*',
+    `🗓️ ${when}`,
+    '',
+    blocks.join('\n\n'),
+    '',
+    '━━━━━━━━━━━━━━',
+    `💰 *TOTAL: ${formatPrice(total)}* (${count} ${count === 1 ? 'item' : 'itens'})`,
+    times > 1 ? `💳 Em até ${times}x de ${formatPrice(total / times)} sem juros` : null,
+    '━━━━━━━━━━━━━━',
+    ...(buyerLines.length ? ['', '👤 *MEUS DADOS*', ...buyerLines] : []),
+    '',
+    'Pode me ajudar com o pagamento e a entrega? ✨',
+  ].filter(line => line !== null).join('\n')
 }
 
 export const restockMessage = product =>

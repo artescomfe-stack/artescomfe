@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { ChevronDown, ChevronRight, CircleHelp, ExternalLink, LogOut, Menu, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react'
 import './admin.css'
-import { logo } from '../ui.jsx'
+const logo = '/img/logo/perfil-instagram.webp' // selo redondo da Artes com Fé
 import AdminLogin, { AcceptInvite, AdminDenied, AdminOffline } from './AdminLogin.jsx'
 import { signOut, useAdminAuth } from './useAdminAuth.js'
 import { BASE, navGroups, sections } from './sections.js'
@@ -63,7 +63,7 @@ function Sidebar({ open, onClose, collapsed, onToggle }) {
     <>
       <aside className={`adm-sidebar ${open ? 'open' : ''}`} aria-label="Menu do painel">
         <div className="adm-sidebar-head">
-          <Link to={BASE} className="adm-brand" onClick={onClose} title="Início"><img src={logo} alt="Artes com Fé" /><span>Painel</span><b className="adm-brand-mark" aria-hidden="true">A</b></Link>
+          <Link to={BASE} className="adm-brand" onClick={onClose} title="Início"><img src={logo} alt="" /><b className="adm-brand-name">Artes com Fé</b><span>Painel</span><b className="adm-brand-mark" aria-hidden="true">A</b></Link>
           <button className="adm-icon-btn adm-only-mobile" onClick={onClose} aria-label="Fechar menu"><X /></button>
           <button className="adm-icon-btn adm-only-desktop" onClick={onToggle} aria-label={collapsed ? 'Abrir menu' : 'Recolher menu'} title={collapsed ? 'Abrir menu' : 'Recolher menu'}>{collapsed ? <PanelLeftOpen /> : <PanelLeftClose />}</button>
         </div>

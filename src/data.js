@@ -1,41 +1,57 @@
 import { supabase } from './supabase.js'
-import { setProducts } from './products.js'
+import { setCategories, setProducts } from './products.js'
 import { store } from './store.js'
+import { setContent } from './content.js'
 
-// Catálogo e configurações vindos do Supabase.
+// Catálogo, categorias, textos e configurações vindos do Supabase (tudo editado no painel /painel-loja).
 // 1) Ao abrir, o site usa na hora a cópia salva da última visita (ou o catálogo local).
 // 2) Em seguida busca a versão atual no banco, atualiza a tela e guarda a nova cópia.
 // Se o Supabase estiver fora do ar, nada quebra: segue com o que já tinha.
 
-const CACHE_KEY = 'artescomfe-catalogo-v1'
+const CACHE_KEY = 'artescomfe-catalogo-v2'
 
-const PRODUCT_FIELDS = `id, code, slug, name, type, line, category_label, finish, swatch, material, dimensions,
-  price, old_price, available, is_new, photo_align, sort_order, description,
-  product_images ( path, thumb_path, position )`
+const PRODUCT_FIELDS = `id, code, slug, old_slugs, name, type, line, category_label, finish, swatch, material, dimensions,
+  price, old_price, available, is_new, photo_align, sort_order, description, details,
+  installments_times, installment_value, installment_note,
+  product_images ( path, thumb_path, position ),
+  product_categories ( category_id )`
+
+const CATEGORY_FIELDS = `id, slug, name, kind, sort_order, active, home_card, home_card_order, home_title, home_image,
+  banner_image, banner_eyebrow, banner_title, banner_text`
+
+const SETTINGS_FIELDS = `whatsapp, instagram_url, instagram_handle, installments_max,
+  logo_url, logo_footer_url, social, footer_text, spotlight_enabled, spotlight_ids`
 
 // Linha do banco → mesmo formato do catálogo local (id = código '01', '02'…; uuid = id do banco).
-const fromRow = row => {
+const fromRow = (row, slugById) => {
   const images = [...(row.product_images || [])].sort((a, b) => a.position - b.position)
+  const slugs = (row.product_categories || []).map(pc => slugById[pc.category_id]).filter(Boolean)
   return {
     id: row.code,
     uuid: row.id,
     slug: row.slug,
+    oldSlugs: row.old_slugs || [], // endereços antigos: ainda abrem e levam ao atual
     name: row.name,
     type: row.type,
     line: row.line,
     category: row.category_label,
+    categorySlugs: slugs.length ? slugs : undefined, // vazio = calcula pelo tipo/linha
     finish: row.finish,
     swatch: row.swatch,
     material: row.material,
     dimensions: row.dimensions,
+    details: row.details || [],
     price: Number(row.price),
     oldPrice: row.old_price ? Number(row.old_price) : undefined,
     available: row.available,
     isNew: row.is_new,
     photoAlign: row.photo_align,
     description: row.description,
-    photos: images.length ? images.map(i => i.path) : ['/placeholder.svg'],
-    thumbs: images.length ? images.map(i => i.thumb_path) : ['/placeholder.svg'],
+    installmentsTimes: row.installments_times || undefined, // vazio = padrão da loja
+    installmentValue: row.installment_value ? Number(row.installment_value) : undefined,
+    installmentNote: row.installment_note || undefined,
+    photos: images.length ? images.map(i => i.path) : ['/img/placeholder-produto.webp'],
+    thumbs: images.length ? images.map(i => i.thumb_path) : ['/img/placeholder-produto.webp'],
   }
 }
 
@@ -45,11 +61,19 @@ const applySettings = settings => {
   store.instagram = settings.instagram_url || store.instagram
   store.instagramHandle = settings.instagram_handle || store.instagramHandle
   store.installments = settings.installments_max || store.installments
+  store.logo = settings.logo_url || null
+  store.logoFooter = settings.logo_footer_url || null
+  store.social = settings.social || []
+  store.footerText = settings.footer_text ?? null
+  store.spotlight = { enabled: settings.spotlight_enabled !== false, ids: settings.spotlight_ids || [] }
 }
 
-const apply = ({ rows, settings }) => {
+const apply = ({ rows, categories, settings, content }) => {
   applySettings(settings) // antes dos produtos: as parcelas dependem dela
-  setProducts(rows.map(fromRow))
+  if (categories?.length) setCategories(categories)
+  setContent(content)
+  const slugById = Object.fromEntries((categories || []).map(c => [c.id, c.slug]))
+  setProducts(rows.map(row => fromRow(row, slugById)))
 }
 
 // Usa a cópia da última visita já no carregamento do módulo (antes da primeira tela).
@@ -60,15 +84,23 @@ try {
 
 export async function refreshCatalog() {
   if (!supabase) return false
-  const [productsRes, settingsRes] = await Promise.all([
-    supabase.from('products').select(PRODUCT_FIELDS).order('sort_order').order('name'),
-    supabase.from('store_settings').select('whatsapp, instagram_url, instagram_handle, installments_max').maybeSingle(),
+  const [productsRes, categoriesRes, settingsRes, contentRes] = await Promise.all([
+    // Só produtos visíveis (quem administra também vê o site como a cliente vê).
+    supabase.from('products').select(PRODUCT_FIELDS).eq('active', true).order('sort_order').order('name'),
+    supabase.from('categories').select(CATEGORY_FIELDS).eq('active', true).order('sort_order'),
+    supabase.from('store_settings').select(SETTINGS_FIELDS).maybeSingle(),
+    supabase.from('site_content').select('key, value'),
   ])
   if (productsRes.error || !productsRes.data?.length) {
     console.warn('Não foi possível carregar o catálogo do Supabase.', productsRes.error)
     return false
   }
-  const payload = { rows: productsRes.data, settings: settingsRes.data }
+  const payload = {
+    rows: productsRes.data,
+    categories: categoriesRes.data || [],
+    settings: settingsRes.data,
+    content: Object.fromEntries((contentRes.data || []).map(r => [r.key, r.value])),
+  }
   apply(payload)
   try { localStorage.setItem(CACHE_KEY, JSON.stringify(payload)) } catch { /* navegação privada */ }
   return true
