@@ -11,7 +11,7 @@ export const store = {
   // TODO: trocar pelo Instagram oficial da Artes com Fé.
   instagram: 'https://www.instagram.com/artescomfe/',
   instagramHandle: '@artescomfe',
-  installments: 6,
+  installments: 2,
 }
 
 // Usa api.whatsapp.com direto: o atalho wa.me redireciona e, nesse redirecionamento,

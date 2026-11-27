@@ -19,7 +19,7 @@ const photos = (id, count) =>
 
 const thumbOf = photo => photo.replace(/\.webp$/, '-480.webp')
 
-const installments = (price, times = 6) =>
+const installments = (price, times = 2) =>
   `${times}x de R$ ${(price / times).toFixed(2).replace('.', ',')}`
 
 const formatPrice = price => `R$ ${price.toFixed(2).replace('.', ',')}`

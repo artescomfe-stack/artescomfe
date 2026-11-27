@@ -156,7 +156,7 @@ export default function Layout() {
       <div className="announcement" aria-label="Vantagens da loja">
         <div className="shell announcement-inner">
           <span><Truck /> Envio e retirada combinados no WhatsApp</span>
-          <span><CreditCard /> Parcelamento disponível</span>
+          <span><CreditCard /> Em até 2x sem juros</span>
           <span><LockKeyhole /> Compra segura com atendimento direto</span>
         </div>
       </div>

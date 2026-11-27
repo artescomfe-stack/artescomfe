@@ -6,6 +6,7 @@ import { ProductCard, WhatsApp } from '../ui.jsx'
 import { helloMessage, whatsappLink } from '../store.js'
 import { products } from '../products.js'
 import { supabase } from '../supabase.js'
+import Account from './Account.jsx'
 
 // Login / criar conta / recuperar senha / minha conta — tudo pelo Supabase Auth.
 // O nome vai em options.data.full_name: o banco cria o perfil (public.profiles) sozinho.
@@ -180,76 +181,10 @@ function NewPassword() {
   )
 }
 
-// ---------- Minha conta ----------
-function Account() {
-  const { user, profile, setProfile, signOut, liked } = useShop()
-  const [form, setForm] = useState({ full_name: '', phone: '' })
-  const [notice, setNotice] = useState(null)
-  const [busy, setBusy] = useState(false)
-  usePageTitle('Minha conta')
-
-  useEffect(() => {
-    setForm({ full_name: profile?.full_name || '', phone: profile?.phone || '' })
-  }, [profile?.full_name, profile?.phone])
-
-  const favorites = products.filter(p => liked.includes(p.id))
-  const firstName = (profile?.full_name || '').split(' ')[0]
-
-  const save = async event => {
-    event.preventDefault()
-    const phone = form.phone.replace(/\D/g, '')
-    if (phone && (phone.length < 10 || phone.length > 13)) { setNotice({ type: 'error', text: 'Telefone com DDD, só números. Ex.: 11999998888' }); return }
-    setBusy(true)
-    const changes = { full_name: form.full_name.trim() || null, phone: phone || null }
-    const { error } = await supabase.from('profiles').update(changes).eq('id', user.id)
-    setBusy(false)
-    if (error) { setNotice({ type: 'error', text: friendly(error) }); return }
-    setProfile(p => ({ ...p, ...changes }))
-    setNotice({ type: 'ok', text: 'Dados salvos! ✨' })
-  }
-
-  return (
-    <div className="login-card account-card">
-      <p className="eyebrow">Minha conta</p>
-      <h2>Olá{firstName ? `, ${firstName}` : ''}! 🙏</h2>
-      <p className="login-sub">{user.email}</p>
-
-      {profile?.role === 'admin' && (
-        <p className="account-admin"><ShieldCheck /> Você é administradora da loja. Produtos, preços, avaliações e configurações são editados no painel do Supabase.</p>
-      )}
-
-      <form onSubmit={save} noValidate>
-        <label className="field">
-          <span>Nome</span>
-          <input value={form.full_name} onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))} autoComplete="name" />
-        </label>
-        <label className="field">
-          <span>WhatsApp</span>
-          <input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} autoComplete="tel" inputMode="tel" placeholder="DDD + número" />
-        </label>
-        {notice && <p className={`login-notice ${notice.type === 'error' ? 'is-error' : ''}`} role="status">{notice.text}</p>}
-        <button className="button dark login-submit" type="submit" disabled={busy}><Save /> {busy ? 'Salvando…' : 'Salvar meus dados'}</button>
-      </form>
-
-      <div className="account-favorites">
-        <h3><Heart /> Meus favoritos <small>{favorites.length}</small></h3>
-        {favorites.length ? (
-          <div className="account-fav-grid">
-            {favorites.map((p, i) => <ProductCard key={p.id} product={p} index={i} sizes="200px" />)}
-          </div>
-        ) : (
-          <p className="muted">Toque no coração das imagens que você amar — elas ficam guardadas aqui. <Link to="/produtos">Ver imagens</Link></p>
-        )}
-      </div>
-
-      <button className="button outline login-whats account-logout" onClick={signOut}><LogOut /> Sair da conta</button>
-    </div>
-  )
-}
-
 export default function Login() {
   const { user, authReady, recovering } = useShop()
   const view = recovering ? 'nova-senha' : user ? 'conta' : 'entrar'
+  if (authReady && view === 'conta') return <Account />
 
   return (
     <section className="login-page">
@@ -264,7 +199,6 @@ export default function Login() {
       <div className="login-form-side">
         {!authReady ? <p className="login-sub">Carregando…</p>
           : view === 'nova-senha' ? <NewPassword />
-          : view === 'conta' ? <Account />
           : <AuthForm />}
       </div>
     </section>

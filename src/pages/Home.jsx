@@ -42,7 +42,7 @@ const categoryItems = [
 const reasons = [
   { icon: Truck, title: 'Entrega combinada', text: 'Com embalagem reforçada' },
   { icon: ShieldCheck, title: 'Compra segura', text: 'Atendimento direto com a loja' },
-  { icon: CreditCard, title: 'Parcelamento disponível', text: 'Consulte as condições' },
+  { icon: CreditCard, title: 'Em até 2x sem juros', text: 'No cartão de crédito' },
   { icon: Headset, title: 'Atendimento humanizado', text: 'Tire dúvidas pelo WhatsApp' },
   { icon: Gem, title: 'Acabamento sofisticado', text: 'Riqueza em cada detalhe' },
 ]
