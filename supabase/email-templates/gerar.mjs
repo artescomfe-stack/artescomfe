@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const SITE = 'https://artescomfe.com.br'
-const INSTAGRAM = 'https://www.instagram.com/artescomfe/'
+const INSTAGRAM = 'https://www.instagram.com/artescomfe_/'
 const C = {
   page: '#fbf7f0', card: '#ffffff', header: '#f3eadc', ink: '#3b2616', text: '#6b5644',
   soft: '#8a7564', button: '#4a2c17', gold: '#c9a24a', line: '#e2d2bb', note: '#f7f0e5',
