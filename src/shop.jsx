@@ -59,6 +59,16 @@ export function ShopProvider({ children }) {
   // Sessão de login.
   useEffect(() => {
     if (!supabase) return
+    // Convite de administrador: o e-mail traz /entrar?token_hash=...&type=invite.
+    // Valida o convite, entra na conta e pede para criar a senha.
+    const params = new URLSearchParams(window.location.search)
+    const tokenHash = params.get('token_hash')
+    if (tokenHash && params.get('type') === 'invite') {
+      window.history.replaceState(null, '', window.location.pathname)
+      supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'invite' }).then(({ error }) => {
+        if (!error) setRecovering(true)
+      })
+    }
     supabase.auth.getSession().then(({ data }) => { setSession(data.session); setAuthReady(true) })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, next) => {
       setSession(next)
