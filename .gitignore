@@ -1,0 +1,13 @@
+node_modules
+dist
+.DS_Store
+*.local
+
+# artefatos de desenvolvimento
+.playwright-mcp
+screenshots
+
+# credenciais
+.env
+.env.*
+!.env.example
