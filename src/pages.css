@@ -1228,9 +1228,10 @@ footer form button svg { width: 18px; }
 }
 @media (max-width: 360px) { .header-inner > .brand .brand-name { font-size: 13px; letter-spacing: .02em; } }
 
-/* ---------- Paginação do catálogo ---------- */
-.pagination { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 40px 0 8px; }
-.pagination button { min-width: 44px; height: 44px; padding: 0 12px; border: 1.5px solid var(--line); border-radius: 10px; background: #fff; color: var(--ink); font: 600 15px var(--sans); cursor: pointer; transition: border-color .2s, background .2s, color .2s; }
-.pagination button:hover:not(:disabled) { border-color: var(--wine); }
-.pagination button.active { background: var(--wine); border-color: var(--wine); color: #fff; }
-.pagination button:disabled { opacity: .4; cursor: default; }
+/* ---------- Paginação do catálogo (mesmo estilo da Maré) ---------- */
+.pagination { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: clamp(40px, 5vw, 64px); }
+.pagination button { display: grid; place-items: center; min-width: 42px; height: 42px; padding: 0 6px; border: 0; border-radius: 12px; background: none; color: var(--muted); font: 600 15px var(--sans); cursor: pointer; transition: background .2s, color .2s; }
+.pagination button:hover:not(:disabled):not(.active) { background: var(--sand-soft); color: var(--wine); }
+.pagination button.active { background: var(--wine); color: #fff; cursor: default; }
+.pagination-arrow svg { width: 20px; height: 20px; }
+.pagination-arrow:disabled { opacity: .35; cursor: default; }

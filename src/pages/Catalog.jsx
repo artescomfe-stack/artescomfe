@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { ArrowRight, Check, ChevronDown, Heart, SlidersHorizontal, Truck, X } from 'lucide-react'
+import { ArrowRight, Check, ChevronDown, Heart, SlidersHorizontal, Truck, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { collections, products, typeLabels } from '../products.js'
 import { usePageTitle, useShop } from '../shop.jsx'
 import { PageIntro, ProductCard, WhatsApp } from '../ui.jsx'
@@ -88,8 +88,8 @@ export default function Catalog() {
     return sorted.sort((a, b) => Number(b.available) - Number(a.available))
   }, [collection, busca, tipos.join(), maxPrice, onlyAvailable, sort, catalogVersion])
 
-  // Paginação: 6 produtos por página (?pagina=2…).
-  const PER_PAGE = 6
+  // Paginação: 9 produtos por página (3 × 3) (?pagina=2…).
+  const PER_PAGE = 9
   const pages = Math.max(1, Math.ceil(result.length / PER_PAGE))
   const page = Math.min(pages, Math.max(1, Number(params.get('pagina')) || 1))
   const pageItems = result.slice((page - 1) * PER_PAGE, page * PER_PAGE)
@@ -206,11 +206,11 @@ export default function Catalog() {
                 </div>
                 {pages > 1 && (
                   <nav className="pagination" aria-label="Páginas">
-                    <button onClick={() => goTo(page - 1)} disabled={page === 1} aria-label="Página anterior">‹</button>
+                    <button className="pagination-arrow" onClick={() => goTo(page - 1)} disabled={page === 1} aria-label="Página anterior"><ChevronLeft /></button>
                     {Array.from({ length: pages }, (_, i) => i + 1).map(n => (
                       <button key={n} className={n === page ? 'active' : ''} aria-current={n === page ? 'page' : undefined} onClick={() => goTo(n)}>{n}</button>
                     ))}
-                    <button onClick={() => goTo(page + 1)} disabled={page === pages} aria-label="Próxima página">›</button>
+                    <button className="pagination-arrow" onClick={() => goTo(page + 1)} disabled={page === pages} aria-label="Próxima página"><ChevronRight /></button>
                   </nav>
                 )}
               </>
