@@ -742,8 +742,6 @@ a.adm-stat:hover { border-color: var(--adm-wine); }
   /* celular: preço ao lado do nome; durante a edição ele ganha uma linha inteira */
   .adm-prow { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: 'order main price' 'switches switches actions'; }
   .adm-prow:not(:has(.adm-prow-order)) { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'main price' 'switches actions'; }
-  .adm-prow:has(.adm-quickprice-edit) { grid-template-areas: 'order main main' 'price price price' 'switches switches actions'; }
-  .adm-prow:not(:has(.adm-prow-order)):has(.adm-quickprice-edit) { grid-template-areas: 'main main' 'price price' 'switches actions'; }
   .adm-prow-price { display: grid; grid-area: price; align-self: start; }
   .adm-quickprice { padding: 4px 6px; }
   .adm-quickprice-edit { display: flex; justify-self: end; }
@@ -959,3 +957,11 @@ a.adm-stat:hover { border-color: var(--adm-wine); }
 
 /* Atalho redondo (Categorias → Atalhos da página inicial) */
 .adm-homecard-img.is-round img { aspect-ratio: 1; border-radius: 50%; object-fit: cover; }
+
+/* Edição rápida do preço: fica no mesmo lugar (sem pular de linha), compacta no celular */
+.adm-quickprice-edit { flex-wrap: nowrap; }
+@media (max-width: 720px) {
+  .adm-quickprice-field { padding: 0 6px; }
+  .adm-quickprice-field input { width: 62px; padding: 6px 0; font-size: 14px; }
+  .adm-quickprice-edit .adm-icon-btn { width: 30px; height: 30px; }
+}

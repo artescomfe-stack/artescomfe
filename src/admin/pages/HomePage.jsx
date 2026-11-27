@@ -7,6 +7,7 @@ import { homeDefaults } from '../../pages/Home.jsx'
 // Os atalhos redondos de categoria são editados em Categorias (foto e "mostrar na página inicial").
 
 const ENTER = 'Enter = quebra de linha.'
+const HERO_MOBILE = { aspect: 4 / 5, outputs: [{ width: 800, height: 1000, quality: 0.84 }, { width: 480, height: 600, quality: 0.8 }], suffixes: ['', '600'] }
 const HERO = { aspect: 3 / 1, outputs: [{ width: 2400, height: 800, quality: 0.84 }, { width: 1200, height: 400, quality: 0.8 }], suffixes: ['', '1200'] }
 const BANNER = { aspect: 1600 / 760, outputs: [{ width: 1600, height: 760, quality: 0.84 }, { width: 800, height: 380, quality: 0.8 }], suffixes: ['', '800'] }
 
@@ -14,6 +15,7 @@ const schema = [
   { type: 'heading', label: 'Banners do topo', text: 'Passam sozinhos a cada 7 segundos. Com mais de um, aparecem as setas e as bolinhas.' },
   { key: 'heroSlides', label: 'Banners', type: 'list', min: 1, max: 5, itemLabel: 'Banner', addLabel: 'Adicionar banner', item: [
     { key: 'image', label: 'Foto', type: 'image', required: true, image: HERO, hint: 'Bem largo (3 × 1). Texto à esquerda.' },
+    { key: 'mobile', label: 'Recorte para celular e tablet', type: 'image', image: HERO_MOBILE, hint: 'Em pé (4 × 5), com a peça no centro. Vazio = usa a foto larga ampliada.' },
     { key: 'alt', label: 'Descrição da foto (para leitores de tela)', type: 'text', max: 140 },
     { key: 'eyebrow', label: 'Texto pequeno (acima do título)', type: 'text', max: 60 },
     { key: 'title', label: 'Título', type: 'textarea', rows: 2, required: true, max: 60, hint: ENTER },

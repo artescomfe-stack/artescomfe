@@ -1333,3 +1333,125 @@ footer form button svg { width: 18px; }
   .colecao-gift-actions { justify-content: center; }
 }
 .footer-text { margin: 12px 0 0; color: rgba(243, 233, 218, .8); font-size: 14px; line-height: 1.6; }
+
+/* ---------- Correções mobile/tablet (rodada de prints) ---------- */
+/* 1) Sacola: mesma largura do menu lateral (sobra uma faixa do site à esquerda) */
+.bag { width: min(420px, 86vw); }
+/* 2) Topo das páginas (PageIntro) no celular/tablet: as artes de banner têm a foto à esquerda e um
+      degradê vazio à direita (lugar do texto no computador). Aqui a imagem é ampliada para mostrar só
+      a parte da foto, ocupando a largura toda — sem área vazia. */
+@media (max-width: 900px) {
+  .page-banner-x.with-photo .page-banner-photo { width: 182%; max-width: none; height: min(calc((100vw - 32px) * 1.82 * 760 / 1600), 340px); object-fit: cover; object-position: left center; }
+  .page-banner-x.with-photo { isolation: isolate; }
+  .intro-meta { display: flex; flex-wrap: wrap; align-items: center; row-gap: 6px; margin: 0; padding: 0; list-style: none; }
+  .intro-meta li { display: inline-flex; align-items: center; }
+}
+/* 3) Atalhos de categoria (página inicial) no celular: menos espaço interno no quadro, mais atalhos visíveis */
+@media (max-width: 900px) {
+  .category-panel { padding: 10px 4px; gap: 2px; grid-auto-columns: 84px; }
+  .category-chip { padding: 4px 2px; gap: 7px; }
+  .category-chip span { width: 64px; height: 64px; }
+  .category-chip b { font-size: 12.5px; line-height: 1.25; }
+}
+/* 4) Cards grandes com foto (página inicial e Sobre) no celular/tablet: mesmo esquema da Maré —
+      texto à esquerda sobre um degradê da cor do fundo (contraste), foto à direita.
+      As artes têm a peça à esquerda, então aqui a foto é espelhada para a peça ficar à direita. */
+@media (max-width: 900px) {
+  .collection-banner { justify-content: flex-start; min-height: 230px; }
+  .collection-banner img { left: auto; right: 0; width: 182%; max-width: none; object-position: left center; transform: scaleX(-1); }
+  .collection-banner:hover img { transform: scaleX(-1) scale(1.04); }
+  .collection-banner::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(90deg, rgba(243, 234, 220, .97) 0%, rgba(243, 234, 220, .92) 38%, rgba(243, 234, 220, .55) 62%, rgba(243, 234, 220, 0) 85%); }
+  .collection-banner > div { z-index: 2; width: 64%; padding: 24px 0 24px 22px; gap: 10px; }
+  .collection-banner h2 { font-size: clamp(26px, 6.4vw, 34px); }
+  .collection-banner p { color: var(--ink); font-size: 14px; }
+}
+@media (max-width: 420px) { .collection-banner > div { width: 74%; } }
+@media (min-width: 601px) and (max-width: 900px) {
+  .collection-banner { min-height: 260px; }
+  .collection-banner img { width: 115%; }
+  .collection-banner > div { width: 56%; }
+}
+/* 5) Rodapé no celular/tablet: colunas lado a lado (menos altura).
+      Linha 1: logo + redes | atendimento · Linha 2: as colunas de links, 2 por linha (3 no tablet). */
+@media (max-width: 900px) {
+  footer .footer-inner { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px 18px; padding-block: 40px 30px; }
+  footer .footer-brand { grid-column: 1 / 2; }
+  footer .footer-contact { grid-column: 2 / -1; align-self: center; }
+  .footer-brand .brand img { height: 92px; }
+  .footer-social { margin-top: 10px; gap: 8px; }
+  .footer-social a { width: 36px; height: 36px; }
+  footer h3 { font-size: 18px; margin-bottom: 4px; }
+  footer p, footer a { font-size: 14px; line-height: 1.55; }
+  .footer-inner > div { gap: 5px; }
+}
+@media (max-width: 600px) {
+  footer .footer-inner { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; padding-block: 32px 24px; }
+  footer .footer-brand { grid-column: 1 / 2; }
+  footer .footer-contact { grid-column: 1 / -1; }
+  .footer-brand .brand img { height: 84px; }
+  .footer-contact p { font-size: 13px; }
+  .footer-contact .button { padding: 10px 14px; font-size: 13px; }
+}
+/* 6) Banner da página inicial no celular/tablet: as fotos do topo (3 × 1) têm a peça à direita e um
+      degradê vazio à esquerda (lugar do texto no computador). Aqui mostra só a parte da peça, largura toda. */
+@media (max-width: 900px) {
+  .hero { overflow: hidden; }
+  .hero > img { width: 312%; max-width: none; margin-left: -212%; height: min(104vw, 460px); object-fit: cover; object-position: 100% 35%; }
+}
+@media (min-width: 601px) and (max-width: 900px) {
+  .hero > img { width: 250%; margin-left: -150%; height: auto; aspect-ratio: 3 / 1; max-height: none; }
+}
+@media (min-width: 601px) and (max-width: 900px) {
+  .hero > img { width: 272%; margin-left: -172%; }
+  .hero .hero-dots { top: calc(100vw * 2.72 / 3 - 34px); bottom: auto; }
+}
+@media (max-width: 600px) {
+  .hero .hero-dots { top: calc(min(104vw, 460px) - 30px); bottom: auto; }
+}
+
+/* 6b) Banner da página inicial com recorte próprio para celular/tablet (em pé, peça no centro) */
+@media (max-width: 900px) {
+  .hero { touch-action: pan-y; }
+  .hero > img.mobile-crop { width: 100%; margin-left: 0; aspect-ratio: auto; height: min(112vw, 560px); object-fit: cover; object-position: center 35%; }
+  .hero:has(img.mobile-crop.active) .hero-dots { top: calc(min(112vw, 560px) - 30px); }
+}
+/* 8) Topo das páginas no celular/tablet: mais limpo — só selo, título e o número de produtos */
+@media (max-width: 900px) {
+  .page-banner-copy .page-intro-text { display: none; }
+  .page-banner-copy .breadcrumb { margin-bottom: 8px; font-size: 13px; }
+  .page-banner-copy h1 { font-size: clamp(30px, 8vw, 40px); }
+  .intro-meta li + li { display: none; }
+  .intro-meta { margin-top: 10px; }
+  .page-banner-copy { padding: 18px 18px 20px; }
+}
+/* 9) Catálogo no celular/tablet: menos espaço entre os botões de categoria e o título da lista */
+@media (max-width: 900px) {
+  .chips { margin-bottom: 4px; }
+  .catalog { padding-top: 6px; }
+  .results-bar { margin-top: 0; padding-top: 6px; }
+}
+/* 10) Foto em tela cheia: centralizada (a largura máxima respeita a margem interna) e lupa com folga */
+.lightbox { padding: 64px 16px 56px; }
+.lightbox img { max-width: min(100%, 960px); max-height: calc(100vh - 140px); max-height: calc(100dvh - 140px); margin: 0 auto; }
+.lightbox-count { left: 50%; transform: translateX(-50%); }
+@media (max-width: 900px) {
+  .lightbox .gallery-arrow { width: 42px; height: 42px; }
+  .lightbox .gallery-arrow.left { left: 10px; } .lightbox .gallery-arrow.right { right: 10px; }
+  .pdp-main .zoom-button { right: 14px; bottom: 14px; width: 42px; height: 42px; }
+}
+/* 11) Página do produto no celular/tablet: caminho (Início / Loja / …) mais perto do topo e da foto */
+@media (max-width: 900px) {
+  .pdp-page { padding-top: 10px; }
+  .pdp-page > .shell > .breadcrumb { margin-bottom: 10px; font-size: 12.5px; gap: 6px; }
+  .pdp-page > .shell > .breadcrumb b { overflow: hidden; max-width: 46vw; text-overflow: ellipsis; white-space: nowrap; }
+}
+/* 12) Cards com foto no celular: a peça mais à direita (rosto visível), texto e degradê ocupando menos */
+@media (max-width: 600px) {
+  .collection-banner img { width: 100%; height: 100%; object-fit: cover; object-position: left center; }
+  .collection-banner > div { width: 60%; padding-left: 18px; }
+  .collection-banner::before { background: linear-gradient(90deg, rgba(243, 234, 220, .97) 0%, rgba(243, 234, 220, .9) 42%, rgba(243, 234, 220, .35) 60%, rgba(243, 234, 220, 0) 72%); }
+  .collection-banner h2 { font-size: 25px; }
+  .collection-banner p { font-size: 13px; }
+  .collection-banner .button { padding: 11px 16px; font-size: 13.5px; }
+}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import { categories, collections, products } from '../products.js'
@@ -15,6 +15,7 @@ export const homeDefaults = {
   heroSlides: [
     {
       image: '/img/banners/hero-sagrada-familia.webp',
+      mobile: '/img/banners/hero-sagrada-familia-mobile.webp',
       alt: 'Imagem da Sagrada Família em marfim e dourado',
       eyebrow: 'Arte sacra • Devoção • Tradição',
       title: 'Peças sacras,\nbeleza e devoção',
@@ -25,6 +26,7 @@ export const homeDefaults = {
     },
     {
       image: '/img/banners/hero-nossa-senhora.webp',
+      mobile: '/img/banners/hero-nossa-senhora-mobile.webp',
       alt: 'Imagem de Nossa Senhora de Fátima com manto de pérolas',
       eyebrow: 'Coleção Nossa Senhora',
       title: 'Maria, Mãe\ne Rainha do lar',
@@ -84,6 +86,19 @@ const fill = text => String(text || '').replace(/\{parcelas\}/g, store.installme
 const featuresOf = codes => String(codes || '').split(/[\s,;]+/).filter(Boolean)
   .map(code => products.find(p => p.id === code.padStart(2, '0') && p.available)).filter(Boolean).slice(0, 2)
 const heroSrcSet = image => responsive(image, 1200)
+// Recorte para celular/tablet (em pé, centrado na peça). Sem recorte salvo, usa a foto larga ampliada.
+const mobileSrcSet = image => /\/img\/banners\/.*-mobile\.webp$/.test(image) ? `${image.replace(/\.webp$/, '-600.webp')} 480w, ${image} 800w` : undefined
+const useSmallScreen = () => {
+  const query = '(max-width: 900px)'
+  const [small, setSmall] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches)
+  useEffect(() => {
+    const mq = window.matchMedia(query)
+    const on = () => setSmall(mq.matches)
+    mq.addEventListener('change', on)
+    return () => mq.removeEventListener('change', on)
+  }, [])
+  return small
+}
 
 function Hero({ content }) {
   const slides = content.heroSlides
@@ -92,6 +107,16 @@ function Hero({ content }) {
   const go = step => setCurrent(index => (index + step + slides.length) % slides.length)
   const slide = slides[current] || slides[0]
   const features = featuresOf(slide.features)
+  const small = useSmallScreen()
+  // Arrastar para o lado (dedo ou mouse): esquerda = próximo, direita = anterior.
+  const touch = useRef(null)
+  const onPointerDown = e => { touch.current = { x: e.clientX, y: e.clientY } }
+  const onPointerUp = e => {
+    if (!touch.current || !multiple) return
+    const dx = e.clientX - touch.current.x, dy = e.clientY - touch.current.y
+    touch.current = null
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.2) go(dx < 0 ? 1 : -1)
+  }
 
   useEffect(() => { if (current >= slides.length) setCurrent(0) }, [slides.length, current])
   useEffect(() => {
@@ -101,10 +126,15 @@ function Hero({ content }) {
   }, [multiple, current])
 
   return (
-    <section className="hero" id="inicio">
-      {slides.map((item, index) => (
-        <img key={item.image + index} className={index === current ? 'active' : ''} src={item.image} srcSet={heroSrcSet(item.image)} sizes="100vw" alt={index === current ? (item.alt || '') : ''} fetchPriority={index === 0 ? 'high' : 'auto'} />
-      ))}
+    <section className="hero" id="inicio" onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => { touch.current = null }}>
+      {slides.map((item, index) => {
+        const crop = small && item.mobile
+        return (
+          <img key={item.image + index} className={`${index === current ? 'active' : ''} ${crop ? 'mobile-crop' : ''}`} src={crop ? item.mobile : item.image}
+            srcSet={crop ? mobileSrcSet(item.mobile) : heroSrcSet(item.image)} sizes="100vw" alt={index === current ? (item.alt || '') : ''}
+            fetchPriority={index === 0 ? 'high' : 'auto'} draggable={false} />
+        )
+      })}
       <div className="hero-inner">
         <div className="hero-copy" key={current}>
           {slide.eyebrow && <p className="eyebrow">{slide.eyebrow}</p>}
