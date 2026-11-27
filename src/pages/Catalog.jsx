@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { ArrowRight, Check, ChevronDown, Heart, SlidersHorizontal, Truck, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { collections, products, typeLabels } from '../products.js'
 import { usePageTitle, useShop } from '../shop.jsx'
-import { PageIntro, ProductCard, WhatsApp } from '../ui.jsx'
+import { Ornament, PageIntro, ProductCard, WhatsApp } from '../ui.jsx'
 import { helloMessage, whatsappLink } from '../store.js'
 
 // Textos do cabeçalho da página, conforme a categoria.
@@ -14,6 +14,40 @@ const banners = {
   'sagrada-familia': { banner: '/img/banners/sagrada-familia.webp', eyebrow: 'Sagrada Família', title: 'Jesus, Maria\ne José.', text: 'A família de Nazaré para abençoar o seu lar — linda o ano inteiro e especial no Natal.' },
   novidades: { banner: '/img/banners/presentes-de-fe.webp', eyebrow: 'Novidades da loja', title: 'Acabaram\nde chegar.', text: 'As imagens mais recentes da Artes com Fé, escolhidas com carinho para o seu oratório.' },
   default: { banner: '/img/banners/presentes-de-fe.webp', eyebrow: 'Nossa loja', title: 'Peças sacras,\nbeleza e devoção.', text: 'Arte sacra de qualidade para fortalecer a sua fé e tornar o seu lar um espaço de oração e paz.' },
+}
+
+
+// Topo próprio das páginas de categoria (Nossa Senhora, Santos…): fundo escuro, título centralizado
+// e as peças da categoria em molduras de arco — diferente do topo da loja geral.
+const CATEGORY_HEROES = ['nossa-senhora', 'santos', 'jesus-cristo', 'sagrada-familia']
+
+function CategoryHero({ banner, label, items, total }) {
+  const lines = banner.title.split(/\n/)
+  const picks = items.filter(p => p.available).slice(0, 3)
+  return (
+    <section className="cat-hero">
+      <img className="cat-hero-bg" src={banner.banner} alt="" aria-hidden="true" />
+      <div className="shell cat-hero-inner">
+        <nav className="breadcrumb" aria-label="Você está em">
+          <Link to="/">Início</Link><span>/</span><Link to="/produtos">Loja</Link><span>/</span><b>{label}</b>
+        </nav>
+        <p className="eyebrow">{banner.eyebrow}</p>
+        <h1>{lines.map((line, i) => <React.Fragment key={i}>{i > 0 && <br />}{i === lines.length - 1 ? <em>{line}</em> : line}</React.Fragment>)}</h1>
+        <Ornament className="cat-hero-ornament" />
+        <p className="cat-hero-text">{banner.text}</p>
+        {picks.length > 0 && (
+          <div className={`cat-hero-arches count-${picks.length}`}>
+            {picks.map((p, i) => (
+              <Link key={p.id} to={`/produto/${p.slug}`} className="cat-arch" style={{ '--i': i }} aria-label={p.name}>
+                <img src={p.thumbs[0]} alt="" />
+              </Link>
+            ))}
+          </div>
+        )}
+        <p className="cat-hero-count"><b>{total}</b> {total === 1 ? 'produto' : 'produtos'} · Entrega combinada no WhatsApp</p>
+      </div>
+    </section>
+  )
 }
 
 const sorts = [
@@ -107,7 +141,9 @@ export default function Catalog() {
 
   return (
     <div className="catalog-page">
-      <PageIntro
+      {CATEGORY_HEROES.includes(collection.key) && !busca ? (
+        <CategoryHero banner={banner} label={collection.label} items={products.filter(collection.test)} total={products.filter(collection.test).length} />
+      ) : <PageIntro
         crumbs={[{ label: 'Loja', to: '/produtos' }, ...(collection.key !== 'todos' ? [{ label: collection.label }] : [])]}
         eyebrow={banner.eyebrow}
         title={banner.title}
@@ -120,7 +156,7 @@ export default function Catalog() {
             <li><WhatsApp /> Compra pelo WhatsApp</li>
           </ul>
         )}
-      />
+      />}
 
       <div className="shell">
         <div className="chips" role="tablist" aria-label="Categorias">
