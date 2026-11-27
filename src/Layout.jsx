@@ -155,8 +155,8 @@ export default function Layout() {
       <a className="skip-link" href="#conteudo">Pular para o conteúdo</a>
       <div className="announcement" aria-label="Vantagens da loja">
         <div className="shell announcement-inner">
-          <span><Truck /> Enviamos para todo o Brasil</span>
-          <span><CreditCard /> Parcele em até 6x sem juros</span>
+          <span><Truck /> Envio e retirada combinados no WhatsApp</span>
+          <span><CreditCard /> Parcelamento disponível</span>
           <span><LockKeyhole /> Compra segura com atendimento direto</span>
         </div>
       </div>
@@ -217,7 +217,7 @@ export default function Layout() {
               <a href={whatsappLink(helloMessage)} target="_blank" rel="noreferrer" aria-label="WhatsApp"><WhatsApp /></a>
             </div>
           </div>
-          <div data-reveal style={{ '--i': 1 }}><h3>Loja</h3><Link to="/produtos">Todas as imagens</Link><Link to="/produtos?categoria=nossa-senhora">Nossa Senhora</Link><Link to="/produtos?categoria=santos">Santos</Link><Link to="/produtos?categoria=sagrada-familia">Sagrada Família</Link><Link to="/promocoes">Ofertas</Link></div>
+          <div data-reveal style={{ '--i': 1 }}><h3>Loja</h3><Link to="/produtos">Todos os produtos</Link><Link to="/produtos?categoria=nossa-senhora">Nossa Senhora</Link><Link to="/produtos?categoria=santos">Santos</Link><Link to="/produtos?categoria=sagrada-familia">Sagrada Família</Link><Link to="/promocoes">Ofertas</Link></div>
           <div data-reveal style={{ '--i': 2 }}><h3>Ajuda</h3><Link to="/sobre#como-comprar">Como comprar</Link><Link to="/sobre#como-comprar">Envio e entrega</Link><Link to="/entrar">Minha conta</Link></div>
           <div data-reveal style={{ '--i': 3 }}><h3>Artes com Fé</h3><Link to="/sobre">Sobre nós</Link><a href={store.instagram} target="_blank" rel="noreferrer">Instagram</a><a href={whatsappLink(helloMessage)} target="_blank" rel="noreferrer">Fale conosco</a></div>
           <div className="footer-contact" data-reveal style={{ '--i': 4 }}>

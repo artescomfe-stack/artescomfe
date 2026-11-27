@@ -657,7 +657,7 @@ export function setProducts(list) {
 }
 
 export const collections = [
-  { key: 'todos', label: 'Todas as imagens', test: () => true },
+  { key: 'todos', label: 'Todos os produtos', test: () => true },
   { key: 'nossa-senhora', label: 'Nossa Senhora', test: p => p.type === 'maria' },
   { key: 'santos', label: 'Santos', test: p => p.type === 'santo' },
   { key: 'jesus-cristo', label: 'Jesus Cristo', test: p => p.type === 'jesus' },

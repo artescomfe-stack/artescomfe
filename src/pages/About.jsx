@@ -16,7 +16,7 @@ const values = [
 const steps = [
   { icon: ShoppingBag, title: 'Escolha suas imagens', text: 'Navegue pela loja, veja todas as fotos e junte as suas favoritas na sacola.' },
   { icon: MessageCircle, title: 'Chame no WhatsApp', text: 'Seu pedido vai pronto para a nossa conversa. Lá confirmamos medidas, pagamento e frete.' },
-  { icon: Package, title: 'Receba em casa', text: 'Enviamos para todo o Brasil, com embalagem reforçada para a sua imagem chegar perfeita.' },
+  { icon: Package, title: 'Receba com cuidado', text: 'Entrega combinada pelo WhatsApp, com embalagem reforçada para a sua imagem chegar perfeita.' },
 ]
 
 // Fotos da vitrine do Instagram (troque pelas do perfil quando quiser).

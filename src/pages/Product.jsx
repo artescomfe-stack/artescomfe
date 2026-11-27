@@ -122,7 +122,7 @@ function InfoTabs({ product }) {
           </ol>
         )}
         {tab === 'envio' && <>
-          <p>📦 Enviamos para todo o Brasil, com embalagem reforçada para a imagem chegar perfeita.</p>
+          <p>📦 Entrega combinada pelo WhatsApp, com embalagem reforçada para a imagem chegar perfeita.</p>
           <p className="muted">Valor e prazo do frete são calculados para o seu CEP e combinados no WhatsApp junto com o pedido.</p>
         </>}
       </div>
@@ -276,7 +276,7 @@ export default function Product() {
             <h1>{product.name}</h1>
             <div className="pdp-price">
               <Price product={product} />
-              {product.available && <small>ou {product.installments} sem juros</small>}
+              {product.available && <small>Parcelamento disponível</small>}
             </div>
             <p className="pdp-intro">{intro}</p>
             <p className="pdp-description">{rest.join('\n\n')}</p>
@@ -312,7 +312,7 @@ export default function Product() {
             )}
 
             <ul className="pdp-perks">
-              <li><Truck /><span><b>Envio para todo o Brasil</b>Frete combinado no WhatsApp</span></li>
+              <li><Truck /><span><b>Entrega combinada</b>Frete e prazo no WhatsApp</span></li>
               <li><WhatsApp /><span><b>Atendimento humanizado</b>Tire dúvidas antes de comprar</span></li>
               <li><Heart /><span><b>Embalado com carinho</b>Cada pedido é especial</span></li>
             </ul>

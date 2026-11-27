@@ -63,6 +63,7 @@ export default function Catalog() {
   // Atualiza um filtro na URL (assim o link filtrado pode ser compartilhado).
   const update = (changes, { keepFilters = true } = {}) => {
     const next = new URLSearchParams(keepFilters ? params : {})
+    if (!('pagina' in changes)) next.delete('pagina') // filtro novo volta para a página 1
     Object.entries(changes).forEach(([key, value]) => {
       if (value === null || value === '' || (Array.isArray(value) && !value.length)) next.delete(key)
       else next.set(key, Array.isArray(value) ? value.join(',') : value)
@@ -87,6 +88,16 @@ export default function Catalog() {
     return sorted.sort((a, b) => Number(b.available) - Number(a.available))
   }, [collection, busca, tipos.join(), maxPrice, onlyAvailable, sort, catalogVersion])
 
+  // Paginação: 6 produtos por página (?pagina=2…).
+  const PER_PAGE = 6
+  const pages = Math.max(1, Math.ceil(result.length / PER_PAGE))
+  const page = Math.min(pages, Math.max(1, Number(params.get('pagina')) || 1))
+  const pageItems = result.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+  const goTo = n => {
+    update({ pagina: n === 1 ? null : String(n) })
+    document.querySelector('.catalog-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   const activeCount = tipos.length + (maxPrice < priceCeil ? 1 : 0) + (onlyAvailable ? 1 : 0) + (busca ? 1 : 0)
 
   useEffect(() => {
@@ -104,8 +115,8 @@ export default function Catalog() {
         banner={banner.banner}
         aside={(
           <ul className="intro-meta">
-            <li><b>{products.filter(collection.test).length}</b> {products.filter(collection.test).length === 1 ? 'imagem' : 'imagens'}</li>
-            <li><Truck /> Envio para todo o Brasil</li>
+            <li><b>{products.filter(collection.test).length}</b> {products.filter(collection.test).length === 1 ? 'produto' : 'produtos'}</li>
+            <li><Truck /> Entrega combinada no WhatsApp</li>
             <li><WhatsApp /> Compra pelo WhatsApp</li>
           </ul>
         )}
@@ -150,7 +161,7 @@ export default function Catalog() {
             <FilterGroup title="Disponibilidade">
               <label className="toggle">
                 <input type="checkbox" checked={onlyAvailable} onChange={() => update({ disponiveis: onlyAvailable ? null : '1' })} />
-                <span className="track"><span /></span> Só imagens disponíveis
+                <span className="track"><span /></span> Só produtos disponíveis
               </label>
             </FilterGroup>
 
@@ -159,15 +170,15 @@ export default function Catalog() {
               <a href={whatsappLink(helloMessage)} target="_blank" rel="noreferrer"><WhatsApp /> Chama a gente no WhatsApp</a>
             </div>
 
-            <button className="button dark filters-apply" onClick={() => setFiltersOpen(false)}>Ver {result.length} {result.length === 1 ? 'imagem' : 'imagens'}</button>
+            <button className="button dark filters-apply" onClick={() => setFiltersOpen(false)}>Ver {result.length} {result.length === 1 ? 'produto' : 'produtos'}</button>
           </aside>
           {filtersOpen && <button className="backdrop filters-backdrop" onClick={() => setFiltersOpen(false)} aria-label="Fechar filtros" />}
 
           <section className="catalog-results" aria-live="polite">
             <div className="results-bar">
               <div>
-                <h2>{busca ? <>Resultados para “{busca}”</> : collection.key === 'todos' ? 'Todas as imagens' : collection.label}</h2>
-                <span>{result.length} {result.length === 1 ? 'imagem encontrada' : 'imagens encontradas'}</span>
+                <h2>{busca ? <>Resultados para “{busca}”</> : collection.key === 'todos' ? 'Todos os produtos' : collection.label}</h2>
+                <span>{result.length} {result.length === 1 ? 'produto encontrado' : 'produtos encontrados'}</span>
               </div>
               <button className="button outline small filters-toggle" onClick={() => setFiltersOpen(true)}><SlidersHorizontal /> Filtros{activeCount > 0 && <b>{activeCount}</b>}</button>
               <label className="sort">
@@ -189,16 +200,27 @@ export default function Catalog() {
             )}
 
             {result.length ? (
-              <div className="catalog-grid" key={`${categoria}-${sort}`}>
-                {result.map((product, index) => <ProductCard key={product.id} product={product} index={index % 3} sizes="(max-width: 900px) 46vw, (max-width: 1200px) 30vw, 300px" />)}
-              </div>
+              <>
+                <div className="catalog-grid" key={`${categoria}-${sort}-${page}`}>
+                  {pageItems.map((product, index) => <ProductCard key={product.id} product={product} index={index % 3} sizes="(max-width: 900px) 46vw, (max-width: 1200px) 30vw, 300px" />)}
+                </div>
+                {pages > 1 && (
+                  <nav className="pagination" aria-label="Páginas">
+                    <button onClick={() => goTo(page - 1)} disabled={page === 1} aria-label="Página anterior">‹</button>
+                    {Array.from({ length: pages }, (_, i) => i + 1).map(n => (
+                      <button key={n} className={n === page ? 'active' : ''} aria-current={n === page ? 'page' : undefined} onClick={() => goTo(n)}>{n}</button>
+                    ))}
+                    <button onClick={() => goTo(page + 1)} disabled={page === pages} aria-label="Próxima página">›</button>
+                  </nav>
+                )}
+              </>
             ) : (
               <div className="empty-state" data-reveal>
                 <Heart />
-                <h3>Nenhuma imagem por aqui… ainda!</h3>
+                <h3>Nenhum produto por aqui… ainda!</h3>
                 <p>Tente tirar algum filtro ou fale com a gente: às vezes a imagem que você procura está chegando ou pode ser encomendada. 🙏</p>
                 <div>
-                  <button className="button outline small" onClick={() => update({ categoria: null }, { keepFilters: false })}>Ver todas as imagens</button>
+                  <button className="button outline small" onClick={() => update({ categoria: null }, { keepFilters: false })}>Ver todos os produtos</button>
                   <a className="button whatsapp small" href={whatsappLink(helloMessage)} target="_blank" rel="noreferrer"><WhatsApp /> Perguntar no WhatsApp</a>
                 </div>
               </div>

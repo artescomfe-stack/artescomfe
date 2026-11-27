@@ -40,9 +40,9 @@ const categoryItems = [
 ]
 
 const reasons = [
-  { icon: Truck, title: 'Envio para todo o Brasil', text: 'Com embalagem reforçada' },
+  { icon: Truck, title: 'Entrega combinada', text: 'Com embalagem reforçada' },
   { icon: ShieldCheck, title: 'Compra segura', text: 'Atendimento direto com a loja' },
-  { icon: CreditCard, title: 'Parcele em até 6x', text: 'Sem juros no cartão' },
+  { icon: CreditCard, title: 'Parcelamento disponível', text: 'Consulte as condições' },
   { icon: Headset, title: 'Atendimento humanizado', text: 'Tire dúvidas pelo WhatsApp' },
   { icon: Gem, title: 'Acabamento sofisticado', text: 'Riqueza em cada detalhe' },
 ]

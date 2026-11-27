@@ -101,7 +101,7 @@ export function ProductCard({ product, index = 0, sizes = defaultSizes }) {
       <div className="product-body">
         <h3><Link to={url}>{product.name}</Link></h3>
         <Price product={product} />
-        <small>{product.available ? `${product.installments} sem juros` : 'Indisponível no momento'}</small>
+        <small>{product.available ? 'Parcelamento disponível' : 'Indisponível no momento'}</small>
       </div>
     </article>
   )
