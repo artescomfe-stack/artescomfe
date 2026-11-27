@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const SITE = 'https://artescomfe.com.br'
-const INSTAGRAM = 'https://www.instagram.com/artescomfe_/'
+const WHATSAPP = 'https://api.whatsapp.com/send?phone=5585999916534'
 const C = {
   page: '#fbf7f0', card: '#ffffff', header: '#f3eadc', ink: '#3b2616', text: '#6b5644',
   soft: '#8a7564', button: '#4a2c17', gold: '#c9a24a', line: '#e2d2bb', note: '#f7f0e5',
@@ -225,7 +225,7 @@ export const templates = {
     heading: 'O e-mail da sua conta mudou.',
     body: p('Este é um aviso de segurança: o e-mail da sua conta na Artes com Fé foi alterado de <strong>{{ .OldEmail }}</strong> para <strong>{{ .Email }}</strong>.') +
       p('Se foi você, está tudo certo e não precisa fazer nada.'),
-    extra: note('Se não foi você, fale com a gente pelo Instagram para recuperarmos sua conta.') + button(INSTAGRAM, 'Falar com a Artes com Fé'),
+    extra: note('Se não foi você, fale com a gente pelo WhatsApp para recuperarmos sua conta.') + button(WHATSAPP, 'Falar com a Artes com Fé'),
     footnote: 'Avisamos sempre que algo importante muda na sua conta.',
   }),
 }

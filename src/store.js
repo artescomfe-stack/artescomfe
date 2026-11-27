@@ -7,7 +7,7 @@ export const store = {
   name: 'Artes com Fé',
   // Número com DDI + DDD, só dígitos. Ex.: '5511999998888'.
   // Enquanto estiver vazio, o WhatsApp abre pedindo para o cliente escolher o contato.
-  whatsapp: '',
+  whatsapp: '5585999916534',
   instagram: 'https://www.instagram.com/artescomfe_/',
   instagramHandle: '@artescomfe_',
   installments: 2,
