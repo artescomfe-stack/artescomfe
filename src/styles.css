@@ -107,7 +107,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 .categories { max-width: 1440px; margin: 0 auto; padding: 18px clamp(12px, 1.4vw, 20px) 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 .category { position: relative; overflow: hidden; aspect-ratio: 1525 / 1005; border-radius: var(--radius); background: var(--sand); }
 .category img { width: 100%; height: 100%; object-fit: cover; object-position: right center; transition: transform .7s ease; }
-.category:hover img { transform: scale(1.04); }
+@media (hover: hover) and (pointer: fine) { .category:hover img { transform: scale(1.04); } }
 .category::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; }
 .category.light::before { background: linear-gradient(90deg, rgba(30, 15, 10, .45), rgba(30, 15, 10, .08) 60%, transparent); }
 .category > div { position: absolute; z-index: 2; inset: 0 auto 0 0; display: flex; flex-direction: column; justify-content: center; gap: 16px; padding-left: 8%; }
@@ -137,8 +137,8 @@ ul { list-style: none; margin: 0; padding: 0; }
 .product-open { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: none; }
 .product-open img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; transition: opacity .45s ease, transform .6s ease; }
 .product-open img.alt { opacity: 0; }
-.product:hover .product-open img.alt { opacity: 1; }
-.product:hover .product-open img { transform: scale(1.03); }
+@media (hover: hover) and (pointer: fine) { .product:hover .product-open img.alt { opacity: 1; } }
+@media (hover: hover) and (pointer: fine) { .product:hover .product-open img { transform: scale(1.03); } }
 .product-image .like, .product-image .add { position: absolute; z-index: 2; display: grid; place-items: center; border: 0; border-radius: 50%; transition: transform .2s, background .2s; }
 .product-image .like { top: 10px; right: 10px; width: 34px; height: 34px; color: var(--wine); background: rgba(255, 255, 255, .95); }
 .product-image .like.liked { color: #b04a4a; }
@@ -304,6 +304,9 @@ footer form button svg { width: 20px; }
 .announcement { animation: fade .8s ease both; }
 .header { animation: drop .8s var(--ease-out) .1s both; }
 .hero > img.active { animation: kenburns 9s var(--ease-out) both; }
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .hero > img.active { animation: none; }
+}
 .hero-copy > * { animation: rise .9s var(--ease-out) both; }
 .hero-copy > :nth-child(1) { animation-delay: .25s; }
 .hero-copy > :nth-child(2) { animation-delay: .38s; }
@@ -348,7 +351,7 @@ footer form button svg { width: 20px; }
 .category .pill svg, .promo .button svg { animation: nudge 2.6s ease-in-out infinite; }
 @keyframes nudge { 0%, 70%, 100% { transform: translateX(0); } 80% { transform: translateX(4px); } 90% { transform: translateX(0); } }
 .promo > img { transition: transform 1s var(--ease-out); }
-.promo:hover > img { transform: scale(1.04); }
+@media (hover: hover) and (pointer: fine) { .promo:hover > img { transform: scale(1.04); } }
 .icon-button svg { transition: transform .25s var(--ease-out); }
 .icon-button:hover svg { transform: scale(1.1); }
 
@@ -427,7 +430,7 @@ footer form button svg { width: 20px; }
 
 /* ============ Peça esgotada ============ */
 .product.sold-out .product-open img { filter: grayscale(.55) brightness(1.04); opacity: .78; }
-.product.sold-out:hover .product-open img.alt { opacity: .78; }
+@media (hover: hover) and (pointer: fine) { .product.sold-out:hover .product-open img.alt { opacity: .78; } }
 .product.sold-out strong { color: var(--muted); text-decoration: line-through; text-decoration-thickness: 1px; }
 .product.sold-out small { visibility: hidden; }
 .badge-soldout { position: absolute; z-index: 2; left: 10px; bottom: 10px; padding: 6px 12px; border-radius: 999px; color: var(--wine); background: rgba(252, 248, 245, .95); font-size: 11.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; box-shadow: 0 4px 14px rgba(0, 0, 0, .08); }

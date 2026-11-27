@@ -56,7 +56,9 @@ function Gallery({ product }) {
       <div className="pdp-main">
         <div className="pdp-strip" ref={strip} onScroll={onScroll}>
           {product.photos.map((photo, index) => (
-            <img key={photo} src={photo} alt={`${product.name} — foto ${index + 1} de ${total}`} className={index === active ? 'active' : ''} loading={index ? 'lazy' : 'eager'} style={product.photoStyle} />
+            <div key={photo} className="pdp-slide">
+              <img src={photo} alt={`${product.name} — foto ${index + 1} de ${total}`} className={index === active ? 'active' : ''} loading={index ? 'lazy' : 'eager'} style={product.photoStyle} />
+            </div>
           ))}
         </div>
         {!product.available && <span className="badge-soldout">Esgotado</span>}
