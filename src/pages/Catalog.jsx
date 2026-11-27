@@ -198,12 +198,12 @@ export default function Catalog() {
             </FilterGroup>
 
 
-            <FilterGroup title="Preço">
+            {priceCeil > priceFloor && <FilterGroup title="Preço">
               <div className="price-range">
-                <input type="range" min={priceFloor} max={priceCeil} step="10" value={maxPrice} onChange={e => update({ ate: Number(e.target.value) >= priceCeil ? null : e.target.value })} aria-label="Preço máximo" style={{ '--fill': `${((maxPrice - priceFloor) / (priceCeil - priceFloor)) * 100}%` }} />
+                <input type="range" min={priceFloor} max={priceCeil} step="10" value={maxPrice} onChange={e => update({ ate: Number(e.target.value) >= priceCeil ? null : e.target.value })} aria-label="Preço máximo" style={{ '--fill': `${priceCeil > priceFloor ? ((maxPrice - priceFloor) / (priceCeil - priceFloor)) * 100 : 100}%` }} />
                 <div><span>R$ {priceFloor}</span><b>até R$ {maxPrice}</b></div>
               </div>
-            </FilterGroup>
+            </FilterGroup>}
 
             <FilterGroup title="Disponibilidade">
               <label className="toggle">

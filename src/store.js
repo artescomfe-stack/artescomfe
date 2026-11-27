@@ -84,7 +84,7 @@ export const bagMessage = (items, buyer = {}) => {
     '',
     '━━━━━━━━━━━━━━',
     `💰 *TOTAL: ${formatPrice(total)}* (${count} ${count === 1 ? 'item' : 'itens'})`,
-    times > 1 ? `💳 Em até ${times}x de ${formatPrice(total / times)} sem juros` : null,
+    times > 1 && total > 0 ? `💳 Em até ${times}x de ${formatPrice(total / times)} sem juros` : null,
     '━━━━━━━━━━━━━━',
     ...(buyerLines.length ? ['', '👤 *MEUS DADOS*', ...buyerLines] : []),
     '',
