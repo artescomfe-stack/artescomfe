@@ -39,7 +39,8 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           publish_branch: deploy
-          force_orphan: true
+          # Mantém o histórico: a Hostinger faz "git pull" e precisa de avanço linear.
+          keep_files: false
           user_name: artescomfe-stack
           user_email: 361752301+artescomfe-stack@users.noreply.github.com
           commit_message: "Build ${{ github.sha }}"
