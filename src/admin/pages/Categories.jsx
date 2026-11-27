@@ -5,12 +5,14 @@ import { listCategories, slugify, uniqueSlug } from '../api.js'
 import { CardHead, InfoTip, Loading, Modal, Switch, errorText, useConfirm, useToast } from '../ui.jsx'
 import ImageField, { removeSiteImage, resolveImage } from '../components/ImageField.jsx'
 
-// Imagem do card da página inicial: mesma proporção dos banners atuais (1525 × 1005),
-// com versão leve de 800 px (o site escolhe a ideal pelo tamanho da tela).
-const CARD_IMAGE = { aspect: 1525 / 1005, outputs: [{ width: 1525, height: 1005, quality: 0.84 }, { width: 800, height: 527, quality: 0.8 }] }
-const CARD_SUFFIXES = ['', '800']
+// Atalho redondo da página inicial: foto quadrada (o site recorta em círculo).
+const CARD_IMAGE = { aspect: 1, outputs: [{ width: 480, height: 480, quality: 0.82 }] }
+const CARD_SUFFIXES = ['']
+// Topo da página da categoria: mesma proporção dos banners do site (1600 × 760) + versão leve de 800 px.
+const BANNER_IMAGE = { aspect: 1600 / 760, outputs: [{ width: 1600, height: 760, quality: 0.84 }, { width: 800, height: 380, quality: 0.8 }] }
+const BANNER_SUFFIXES = ['', '800']
 
-const blank = kind => ({ name: '', slug: '', kind, active: true, home_card: false, home_title: '', home_image: null, home_tone: 'light', banner_eyebrow: '', banner_title: '', banner_text: '' })
+const blank = kind => ({ name: '', slug: '', kind, active: true, home_card: false, home_title: '', home_image: null, home_tone: 'light', banner_image: null, banner_eyebrow: '', banner_title: '', banner_text: '' })
 
 function CategoryModal({ category, onClose, onSaved }) {
   const toast = useToast()
@@ -23,10 +25,10 @@ function CategoryModal({ category, onClose, onSaved }) {
 
   const save = async () => {
     if (form.name.trim().length < 2) return setError('Escreva o nome da categoria.')
-    if (form.home_card && !form.home_image) return setError('Para aparecer na página inicial, escolha uma imagem para o card.')
     setSaving(true); setError(null)
     try {
       const home_image = await resolveImage(form.home_image, 'categorias', CARD_SUFFIXES)
+      const banner_image = await resolveImage(form.banner_image, 'categorias', BANNER_SUFFIXES)
       const fields = {
         name: form.name.trim(),
         slug: await uniqueSlug(form.slug || form.name, 'categories', category.id),
@@ -36,6 +38,7 @@ function CategoryModal({ category, onClose, onSaved }) {
         home_title: form.home_title.trim() || null,
         home_image,
         home_tone: form.home_tone,
+        banner_image,
         banner_eyebrow: form.banner_eyebrow.trim() || null,
         banner_title: form.banner_title.trim() || null,
         banner_text: form.banner_text.trim() || null,
@@ -49,6 +52,7 @@ function CategoryModal({ category, onClose, onSaved }) {
         const { error: e } = await supabase.from('categories').update(fields).eq('id', category.id)
         if (e) throw e
         if (category.home_image && category.home_image !== home_image) await removeSiteImage(category.home_image, CARD_SUFFIXES)
+        if (category.banner_image && category.banner_image !== banner_image) await removeSiteImage(category.banner_image, BANNER_SUFFIXES)
       }
       toast(isNew ? 'Categoria criada.' : 'Categoria salva. O site já mostra a versão nova.')
       onSaved()
@@ -62,42 +66,35 @@ function CategoryModal({ category, onClose, onSaved }) {
       {error && <p className="adm-notice is-error">{error}</p>}
       <div className="adm-grid-2">
         <label className="adm-field"><span>Nome *</span>
-          <input value={form.name} onChange={e => { set('name', e.target.value); if (!slugTouched) set('slug', slugify(e.target.value)) }} placeholder="Ex.: Macaquinhos" maxLength={60} />
+          <input value={form.name} onChange={e => { set('name', e.target.value); if (!slugTouched) set('slug', slugify(e.target.value)) }} placeholder="Ex.: Anjos" maxLength={60} />
         </label>
         <label className="adm-field"><span>Endereço<InfoTip>{`Página: /produtos?categoria=${form.slug || '…'}`}{!isNew && '\n\nMudar o endereço quebra links antigos já compartilhados.'}</InfoTip></span>
           <input value={form.slug} onChange={e => { setSlugTouched(true); set('slug', slugify(e.target.value)) }} />
         </label>
       </div>
       <div className="adm-field">
-        <span>Tipo<InfoTip>Coleção aparece no selo e no caminho da página do produto. Tipo de peça aparece no filtro do catálogo.</InfoTip></span>
+        <span>Tipo<InfoTip>Devoção = onde a peça aparece no menu, nos atalhos e no filtro (Nossa Senhora, Santos…). Linha = tipo de produto (Imagens sacras, Quadros…).</InfoTip></span>
         <div className="adm-segmented">
-          <button type="button" className={form.kind === 'colecao' ? 'active' : ''} onClick={() => set('kind', 'colecao')}>Coleção (ex.: Maré Move)</button>
-          <button type="button" className={form.kind === 'tipo' ? 'active' : ''} onClick={() => set('kind', 'tipo')}>Tipo de peça (ex.: Vestidos)</button>
+          <button type="button" className={form.kind === 'tipo' ? 'active' : ''} onClick={() => set('kind', 'tipo')}>Devoção (ex.: Santos)</button>
+          <button type="button" className={form.kind === 'colecao' ? 'active' : ''} onClick={() => set('kind', 'colecao')}>Linha (ex.: Quadros)</button>
         </div>
       </div>
       <Switch checked={form.active} onChange={v => set('active', v)} label={form.active ? 'Ativa (aparece no site)' : 'Oculta (não aparece no site)'} />
 
-      <h3 className="adm-subtitle adm-title-info">Banner da página da categoria<InfoTip>{`Textos do topo de /produtos?categoria=${form.slug || '…'}. Vazio = usa o texto geral do catálogo.`}</InfoTip></h3>
+      <h3 className="adm-subtitle adm-title-info">Topo da página da categoria<InfoTip>{`Topo de /produtos?categoria=${form.slug || '…'} (fundo escuro, título no centro). Vazio = usa o nome e o texto geral do catálogo.`}</InfoTip></h3>
+      <ImageField label="Foto de fundo do topo" value={form.banner_image} onChange={v => set('banner_image', v)} {...BANNER_IMAGE} allowRemove hint="Fica clarinha atrás do título." />
       <div className="adm-grid-2">
-        <label className="adm-field"><span>Texto pequeno (acima do título)</span><input value={form.banner_eyebrow} onChange={e => set('banner_eyebrow', e.target.value)} placeholder={form.name || 'Maré Move'} /></label>
-        <label className="adm-field"><span>Título<InfoTip>Enter = quebra de linha.</InfoTip></span><textarea rows={2} value={form.banner_title} onChange={e => set('banner_title', e.target.value)} placeholder={'Seu movimento,\nsua melhor versão.'} /></label>
+        <label className="adm-field"><span>Texto pequeno (acima do título)</span><input value={form.banner_eyebrow} onChange={e => set('banner_eyebrow', e.target.value)} placeholder={form.name || 'Santos'} /></label>
+        <label className="adm-field"><span>Título<InfoTip>Enter = quebra de linha.</InfoTip></span><textarea rows={2} value={form.banner_title} onChange={e => set('banner_title', e.target.value)} placeholder={'Amigos de Deus,\nexemplos de fé.'} /></label>
       </div>
       <label className="adm-field"><span>Texto</span><textarea rows={2} value={form.banner_text} onChange={e => set('banner_text', e.target.value)} /></label>
 
-      <h3 className="adm-subtitle">Card na página inicial</h3>
+      <h3 className="adm-subtitle">Atalho redondo na página inicial</h3>
       <Switch checked={form.home_card} onChange={v => set('home_card', v)} label={form.home_card ? 'Aparece na página inicial' : 'Não aparece na página inicial'} />
       {form.home_card && (
         <div className="adm-home-card-fields">
-          <ImageField label="Imagem do card" value={form.home_image} onChange={v => set('home_image', v)} {...CARD_IMAGE} hint="Formato paisagem. Deixe o lado esquerdo mais livre: é onde fica o texto." />
-          <div className="adm-grid-2">
-            <label className="adm-field"><span>Texto do card<InfoTip>Enter = quebra de linha (ex.: "Conjuntos" / "Fitness").</InfoTip></span><textarea rows={2} value={form.home_title} onChange={e => set('home_title', e.target.value)} placeholder={form.name} /></label>
-            <div className="adm-field"><span>Cor do texto</span>
-              <div className="adm-segmented">
-                <button type="button" className={form.home_tone === 'light' ? 'active' : ''} onClick={() => set('home_tone', 'light')}>Branco (foto escura)</button>
-                <button type="button" className={form.home_tone === 'dark' ? 'active' : ''} onClick={() => set('home_tone', 'dark')}>Vinho (foto clara)</button>
-              </div>
-            </div>
-          </div>
+          <ImageField label="Foto do atalho" value={form.home_image} onChange={v => set('home_image', v)} {...CARD_IMAGE} allowRemove hint="Quadrada (vira círculo). Vazio = foto do 1º produto." />
+          <label className="adm-field"><span>Nome no atalho<InfoTip>Vazio = usa o nome da categoria.</InfoTip></span><input value={form.home_title} onChange={e => set('home_title', e.target.value)} placeholder={form.name} maxLength={30} /></label>
         </div>
       )}
     </Modal>
@@ -151,6 +148,7 @@ export default function Categories() {
     const { error } = await supabase.from('categories').delete().eq('id', cat.id)
     if (error) return toast(errorText(error), 'error')
     if (cat.home_image) await removeSiteImage(cat.home_image, CARD_SUFFIXES)
+    if (cat.banner_image) await removeSiteImage(cat.banner_image, BANNER_SUFFIXES)
     toast('Categoria excluída.')
     load()
   }
@@ -160,18 +158,18 @@ export default function Categories() {
 
   const bySort = (a, b) => a.sort_order - b.sort_order
   const groups = [
-    { kind: 'colecao', title: 'Coleções', text: 'Linhas da loja.', info: 'Aparecem no selo e no caminho da página do produto.' },
-    { kind: 'tipo', title: 'Tipos de peça', text: 'Filtro do catálogo.', info: 'Aparecem no filtro "Tipo de peça" do catálogo.' },
+    { kind: 'tipo', title: 'Devoções', text: 'Menu, atalhos e filtro.', info: 'Nossa Senhora, Santos, Jesus Cristo… Aparecem nos botões do catálogo, nos atalhos da página inicial e no topo de cada página.' },
+    { kind: 'colecao', title: 'Linhas da loja', text: 'Tipo de produto.', info: 'Imagens sacras, Quadros e placas, Terços, Presentes. Aparecem como botões no catálogo quando têm produtos ("Imagens sacras" não aparece, porque é quase tudo).' },
   ]
   const homeCards = categories.filter(c => c.home_card).sort((a, b) => a.home_card_order - b.home_card_order)
 
   return (
     <>
       <div className="adm-page-head">
-        <p className="adm-muted adm-title-info">Coleções e tipos de peça da loja.<InfoTip>A ordem aqui é a ordem dos botões de categoria no catálogo do site.</InfoTip></p>
+        <p className="adm-muted adm-title-info">Devoções e linhas da loja.<InfoTip>A ordem aqui é a ordem dos botões de categoria no catálogo do site.</InfoTip></p>
         <span className="adm-head-actions">
-          <button className="adm-btn outline" onClick={() => setEditing(blank('tipo'))}><Plus /> Novo tipo de peça</button>
-          <button className="adm-btn primary" onClick={() => setEditing(blank('colecao'))}><Plus /> Nova coleção</button>
+          <button className="adm-btn outline" onClick={() => setEditing(blank('colecao'))}><Plus /> Nova linha</button>
+          <button className="adm-btn primary" onClick={() => setEditing(blank('tipo'))}><Plus /> Nova devoção</button>
         </span>
       </div>
 
@@ -207,12 +205,12 @@ export default function Categories() {
       })}
 
       <section className="adm-card">
-        <CardHead title="Cards da página inicial" text="Na ordem em que aparecem no site." info={'Aparecem as categorias com "Card na página inicial" ligado, nesta ordem.\n\nPara incluir outra, edite a categoria e ligue essa opção.'} />
+        <CardHead title="Atalhos da página inicial" text="Na ordem em que aparecem no site." info={'As bolinhas abaixo do banner. Aparecem as categorias com "Atalho na página inicial" ligado, nesta ordem, entre "Todas" e "Novidades".\n\nPara incluir outra, edite a categoria e ligue essa opção.'} />
         {homeCards.length === 0 ? <p className="adm-muted"><Tags /> Nenhum card ligado.</p> : (
           <ul className="adm-homecards">
             {homeCards.map((c, i) => (
               <li key={c.id}>
-                <span className="adm-homecard-img">{c.home_image && <img src={c.home_image} alt="" />}<b className={c.home_tone}>{(c.home_title || c.name).split('\n').map((l, k) => <React.Fragment key={k}>{k > 0 && <br />}{l}</React.Fragment>)}</b></span>
+                <span className="adm-homecard-img is-round">{c.home_image && <img src={c.home_image} alt="" />}<b className="dark">{c.home_title || c.name}</b></span>
                 <span className="adm-homecard-actions">
                   <button className="adm-icon-btn" onClick={() => swap(homeCards, i, i - 1, 'home_card_order')} disabled={i === 0} aria-label="Mover para antes"><ArrowUp /></button>
                   <button className="adm-icon-btn" onClick={() => swap(homeCards, i, i + 1, 'home_card_order')} disabled={i === homeCards.length - 1} aria-label="Mover para depois"><ArrowDown /></button>

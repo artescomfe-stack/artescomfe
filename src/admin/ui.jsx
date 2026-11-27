@@ -197,8 +197,7 @@ export function CardHead({ title, text, info, aside, as: Tag = 'h2' }) {
   return (
     <div className="adm-card-head">
       <div>
-        <Tag className="adm-title-info">{title}{info && <InfoTip label={`Sobre: ${typeof title === 'string' ? title : 'este quadro'}`}>{info}</InfoTip>}</Tag>
-        {text && <p>{text}</p>}
+        <Tag className="adm-title-info">{title}{(info || text) && <InfoTip label={`Sobre: ${typeof title === 'string' ? title : 'este quadro'}`}>{[text, info].filter(Boolean).join('\n\n')}</InfoTip>}</Tag>
       </div>
       {aside}
     </div>

@@ -956,3 +956,6 @@ a.adm-stat:hover { border-color: var(--adm-wine); }
 .adm-brand::after { content: none; }
 .adm-brand b.adm-brand-name { color: var(--adm-wine); font-family: var(--serif); font-size: 17px; font-weight: 600; line-height: 1.1; }
 .adm.is-collapsed .adm-brand .adm-brand-name { display: none; }
+
+/* Atalho redondo (Categorias → Atalhos da página inicial) */
+.adm-homecard-img.is-round img { aspect-ratio: 1; border-radius: 50%; object-fit: cover; }

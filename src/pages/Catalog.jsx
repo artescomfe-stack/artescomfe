@@ -5,21 +5,31 @@ import { collections, products, typeLabels } from '../products.js'
 import { usePageTitle, useShop } from '../shop.jsx'
 import { Ornament, PageIntro, ProductCard, WhatsApp } from '../ui.jsx'
 import { helloMessage, whatsappLink } from '../store.js'
+import { pageContent } from '../content.js'
 
-// Textos do cabeçalho da página, conforme a categoria.
-const banners = {
-  'nossa-senhora': { banner: '/img/banners/colecao-nossa-senhora.webp', eyebrow: 'Coleção Nossa Senhora', title: 'Maria, Mãe\ne Rainha do lar.', text: 'Diversas representações de Nossa Senhora para a sua devoção — Aparecida, Fátima, Guadalupe e muito mais.' },
-  santos: { banner: '/img/banners/santos.webp', eyebrow: 'Santos', title: 'Amigos de Deus,\nexemplos de fé.', text: 'Imagens dos santos que intercedem por nós, com acabamentos ricos em detalhes.' },
-  'jesus-cristo': { banner: '/img/banners/jesus-cristo.webp', eyebrow: 'Jesus Cristo', title: 'O Caminho,\na Verdade e a Vida.', text: 'Imagens para meditar a vida e a Paixão de Cristo e renovar a fé todos os dias.' },
-  'sagrada-familia': { banner: '/img/banners/sagrada-familia.webp', eyebrow: 'Sagrada Família', title: 'Jesus, Maria\ne José.', text: 'A família de Nazaré para abençoar o seu lar — linda o ano inteiro e especial no Natal.' },
-  novidades: { banner: '/img/banners/presentes-de-fe.webp', eyebrow: 'Novidades da loja', title: 'Acabaram\nde chegar.', text: 'As imagens mais recentes da Artes com Fé, escolhidas com carinho para o seu oratório.' },
-  default: { banner: '/img/banners/presentes-de-fe.webp', eyebrow: 'Nossa loja', title: 'Peças sacras,\nbeleza e devoção.', text: 'Arte sacra de qualidade para fortalecer a sua fé e tornar o seu lar um espaço de oração e paz.' },
+// Topo do catálogo "Todos" e da vitrine "Novidades" (painel → Textos das páginas → Catálogo).
+// Cada categoria tem o próprio topo (painel → Categorias → editar → Topo da página).
+export const catalogDefaults = {
+  eyebrow: 'Nossa loja',
+  title: 'Peças sacras,\nbeleza e devoção.',
+  text: 'Arte sacra de qualidade para fortalecer a sua fé e tornar o seu lar um espaço de oração e paz.',
+  image: '/img/banners/presentes-de-fe.webp',
+  shippingBadge: 'Entrega combinada no WhatsApp',
+  whatsappBadge: 'Compra pelo WhatsApp',
+  newsEyebrow: 'Novidades da loja',
+  newsTitle: 'Acabaram\nde chegar.',
+  newsText: 'As imagens mais recentes da Artes com Fé, escolhidas com carinho para o seu oratório.',
 }
 
+const bannerFor = (collection, page) => {
+  const c = collection.category
+  if (c) return { banner: c.banner_image || page.image, eyebrow: c.banner_eyebrow || c.name, title: c.banner_title || c.name, text: c.banner_text || page.text }
+  if (collection.key === 'novidades') return { banner: page.image, eyebrow: page.newsEyebrow, title: page.newsTitle || 'Novidades', text: page.newsText }
+  return { banner: page.image, eyebrow: page.eyebrow, title: page.title, text: page.text }
+}
 
 // Topo próprio das páginas de categoria (Nossa Senhora, Santos…): fundo escuro, título centralizado
 // e as peças da categoria em molduras de arco — diferente do topo da loja geral.
-const CATEGORY_HEROES = ['nossa-senhora', 'santos', 'jesus-cristo', 'sagrada-familia']
 
 function CategoryHero({ banner, label, items, total }) {
   const lines = banner.title.split(/\n/)
@@ -44,7 +54,7 @@ function CategoryHero({ banner, label, items, total }) {
             ))}
           </div>
         )}
-        <p className="cat-hero-count"><b>{total}</b> {total === 1 ? 'produto' : 'produtos'} · Entrega combinada no WhatsApp</p>
+        <p className="cat-hero-count"><b>{total}</b> {total === 1 ? 'produto' : 'produtos'}</p>
       </div>
     </section>
   )
@@ -91,7 +101,8 @@ export default function Catalog() {
   const sort = params.get('ordem') || 'destaques'
 
   const collection = collections.find(c => c.key === categoria) || collections[0]
-  const banner = banners[categoria] || banners.default
+  const texts = pageContent('catalog', catalogDefaults)
+  const banner = bannerFor(collection, texts)
   usePageTitle(busca ? `Busca: ${busca}` : collection.key === 'todos' ? 'Loja' : collection.label)
 
   // Atualiza um filtro na URL (assim o link filtrado pode ser compartilhado).
@@ -141,7 +152,7 @@ export default function Catalog() {
 
   return (
     <div className="catalog-page">
-      {CATEGORY_HEROES.includes(collection.key) && !busca ? (
+      {collection.category && !busca ? (
         <CategoryHero banner={banner} label={collection.label} items={products.filter(collection.test)} total={products.filter(collection.test).length} />
       ) : <PageIntro
         crumbs={[{ label: 'Loja', to: '/produtos' }, ...(collection.key !== 'todos' ? [{ label: collection.label }] : [])]}
@@ -152,15 +163,15 @@ export default function Catalog() {
         aside={(
           <ul className="intro-meta">
             <li><b>{products.filter(collection.test).length}</b> {products.filter(collection.test).length === 1 ? 'produto' : 'produtos'}</li>
-            <li><Truck /> Entrega combinada no WhatsApp</li>
-            <li><WhatsApp /> Compra pelo WhatsApp</li>
+            {texts.shippingBadge && <li><Truck /> {texts.shippingBadge}</li>}
+            {texts.whatsappBadge && <li><WhatsApp /> {texts.whatsappBadge}</li>}
           </ul>
         )}
       />}
 
       <div className="shell">
         <div className="chips" role="tablist" aria-label="Categorias">
-          {collections.map((c, index) => (
+          {collections.filter(c => c.key === 'todos' || c.key === collection.key || products.some(c.test)).map((c, index) => (
             <button key={c.key} role="tab" aria-selected={c.key === collection.key} className={c.key === collection.key ? 'active' : ''} onClick={() => update({ categoria: c.key === 'todos' ? null : c.key })} style={{ '--i': index }}>
               {c.label}
               <small>{products.filter(c.test).length}</small>

@@ -11,20 +11,25 @@ import { logo as defaultLogo } from '../../ui.jsx'
 
 // Logo e rodapé: logos e texto da marca + redes sociais (store_settings) e colunas/textos do rodapé (site_content 'footer').
 
-const DEFAULT_FOOTER_TEXT = 'Moda que acompanha seu ritmo,\ncom leveza e personalidade.'
+const DEFAULT_FOOTER_TEXT = ''
 const networkOptions = Object.entries(socialNetworks).filter(([key]) => key !== 'instagram').map(([value, { label }]) => ({ value, label }))
 
 const footerSchema = [
-  { key: 'columns', label: 'Colunas de links', type: 'list', min: 1, max: 3, itemLabel: 'Coluna', addLabel: 'Adicionar coluna', columns: 2, item: [
+  { key: 'columns', label: 'Colunas de links', type: 'list', min: 1, max: 4, itemLabel: 'Coluna', addLabel: 'Adicionar coluna', columns: 2, item: [
     { key: 'title', label: 'Título da coluna', type: 'text', required: true, max: 30 },
     { key: 'links', label: 'Links', type: 'list', min: 1, max: 6, itemLabel: 'Link', addLabel: 'Adicionar link', item: [
       { key: 'label', label: 'Texto', type: 'text', required: true, max: 40 },
       { key: 'link', label: 'Leva para', type: 'link' },
     ] },
   ] },
-  { type: 'heading', label: 'Newsletter' },
-  { key: 'newsletterTitle', label: 'Título', type: 'text', required: true, max: 40 },
-  { key: 'newsletterText', label: 'Texto', type: 'textarea', rows: 2, max: 120 },
+  { type: 'heading', label: 'Coluna de atendimento', text: 'A última coluna do rodapé, com o botão do WhatsApp.' },
+  { key: 'contactTitle', label: 'Título', type: 'text', max: 30 },
+  { key: 'contactText', label: 'Texto', type: 'textarea', rows: 2, max: 160 },
+  { key: 'contactButton', label: 'Texto do botão do WhatsApp', type: 'text', max: 30, hint: 'Vazio = sem botão.' },
+  { type: 'heading', label: 'Faixa da comunidade (newsletter)', text: 'A faixa clara acima do rodapé, com o campo de e-mail.' },
+  { key: 'newsletterTitle', label: 'Título', type: 'text', required: true, max: 50 },
+  { key: 'newsletterText', label: 'Texto', type: 'textarea', rows: 2, max: 160 },
+  { key: 'newsletterScript', label: 'Frase ao lado do selo', type: 'textarea', rows: 2, max: 40, hint: 'Enter = quebra de linha. Vazio = não mostra.' },
   { type: 'heading', label: 'Linha final' },
   { key: 'copyright', label: 'Direitos autorais', type: 'text', required: true, max: 100, hint: '{ano} vira o ano atual automaticamente.' },
 ]
@@ -126,11 +131,11 @@ export default function Appearance() {
         <CardHead title="Logotipo" info="PNG, WebP ou SVG com fundo transparente ficam melhores. O logo vai sem recorte e é reduzido sozinho para carregar rápido." />
         <div className="adm-logos">
           <div className="adm-logo-box">
-            <ImageField label="Logo do topo *" value={form.logo} onChange={v => set('logo', v)} previewRatio="16 / 9" hint="Aparece no cabeçalho e no menu do celular." />
+            <ImageField label="Selo do topo *" value={form.logo} onChange={v => set('logo', v)} previewRatio="1 / 1" hint="O selo ao lado do nome Artes com Fé, no cabeçalho e no menu do celular." />
             {typeof form.logo === 'string' && form.logo !== defaultLogo && <button type="button" className="adm-btn ghost small" onClick={() => set('logo', defaultLogo)}>Usar o logo original</button>}
           </div>
           <div className="adm-logo-box is-footer">
-            <ImageField label="Logo do rodapé" value={form.logoFooter} onChange={v => set('logoFooter', v)} previewRatio="16 / 9" allowRemove hint="Opcional. Vazio = usa o mesmo logo do topo." />
+            <ImageField label="Logo do rodapé" value={form.logoFooter} onChange={v => set('logoFooter', v)} previewRatio="3 / 4" allowRemove hint="Opcional. Vazio = logotipo claro padrão (traço creme sobre o fundo marrom)." />
           </div>
         </div>
       </section>

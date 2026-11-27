@@ -1,36 +1,35 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { ArrowDown, ArrowUp, ExternalLink, ImageOff, Plus, Search, Sparkles, X } from 'lucide-react'
-import { listCategories, listProducts, getSiteContent, saveSiteContent } from '../api.js'
+import { listProducts, getSiteContent, saveSiteContent } from '../api.js'
 import { CardHead, InfoTip, Loading, Switch, errorText, formatBRL, useToast, useUnsavedGuard } from '../ui.jsx'
-import { Fields, clean, mergePage, validate } from '../components/ContentEditor.jsx'
+import { Fields, clean, finalize, imagesOf, mergePage, validate } from '../components/ContentEditor.jsx'
+import { removeSiteImage } from '../components/ImageField.jsx'
 import { collectionDefaults, COLLECTION_PATH } from '../../pages/Collection.jsx'
 
 // Coleção: a página /colecao inteira (site_content 'collection'). Nome (vira o nome do menu),
 // textos do topo, peças escolhidas na ordem, enfeites dourados e o quadro do final.
 // Serve para qualquer coleção: "Coleção Janeiro", "Verão", "Dia das Mães"…
 
-const LEGACY_CATEGORY = 'colecao-dezembro'
 const normalize = t => (t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 const problem = p => !p.active ? 'Oculto — não aparece' : !p.available ? 'Indisponível — aparece sem preço' : null
 
 const topSchema = [
-  { key: 'name', label: 'Nome da coleção', type: 'text', required: true, max: 24, placeholder: 'Ex.: Coleção Verão',
-    hint: 'É o nome do menu do topo, do caminho da página e da aba do navegador. Pode ser qualquer nome: Coleção Janeiro, Verão, Dia das Mães…' },
+  { key: 'name', label: 'Nome da coleção', type: 'text', required: true, max: 24, placeholder: 'Ex.: Coleção de Natal',
+    hint: 'Nome no menu, na página e na aba do navegador.' },
   { key: 'eyebrow', label: 'Texto pequeno (acima do título)', type: 'text', max: 50, hint: 'Vazio = não mostra.' },
   { key: 'title', label: 'Título grande', type: 'textarea', rows: 2, max: 60, hint: 'Enter = quebra de linha. A última linha fica em itálico. Vazio = usa o nome da coleção.' },
   { key: 'text', label: 'Texto', type: 'textarea', rows: 3, max: 220, hint: 'Vazio = não mostra.' },
-  { key: 'script', label: 'Frase em letra cursiva (sobre as fotos)', type: 'text', max: 30, hint: 'Aparece sobre as fotos das peças, no computador. Vazio = não mostra.' },
-  { key: 'seal', label: 'Texto do selo giratório', type: 'text', max: 40, placeholder: 'maré • verão • 2027', hint: 'O selo redondo que gira ao lado das fotos. Separe as palavras com •.' },
+  { key: 'image', label: 'Foto do topo', type: 'image', required: true, image: { aspect: 1600 / 760, outputs: [{ width: 1600, height: 760, quality: 0.84 }, { width: 800, height: 380, quality: 0.8 }], suffixes: ['', '800'] } },
 ]
 const listSchema = [
-  { key: 'listSuffix', label: 'Frase depois do número de peças', type: 'text', max: 40, placeholder: 'para as festas',
-    hint: 'Ex.: "para as festas" vira "4 peças escolhidas para as festas". Vazio = só "4 peças escolhidas".' },
+  { key: 'listSuffix', label: 'Frase depois do número de peças', type: 'text', max: 40, placeholder: 'para o seu Natal',
+    hint: 'Ex.: "4 produtos escolhidos para o seu Natal".' },
   { key: 'emptyText', label: 'Aviso quando não há peças', type: 'text', max: 80 },
 ]
 const giftSchema = [
   { key: 'giftTitle', label: 'Título', type: 'text', max: 50 },
   { key: 'giftText', label: 'Texto', type: 'textarea', rows: 2, max: 200 },
-  { key: 'giftMessage', label: 'Mensagem que abre no WhatsApp', type: 'textarea', rows: 2, max: 200, hint: 'Texto que já vem escrito quando a cliente toca em "Falar com a Maré".' },
+  { key: 'giftMessage', label: 'Mensagem que abre no WhatsApp', type: 'textarea', rows: 2, max: 200, hint: 'Texto que já vem escrito quando a pessoa toca em "Falar com a Artes com Fé".' },
 ]
 const textSchema = [...topSchema, ...listSchema, ...giftSchema]
 
@@ -51,19 +50,17 @@ export default function CollectionPage() {
 
   const load = async () => {
     try {
-      const [list, content, categories] = await Promise.all([listProducts(), getSiteContent('collection'), listCategories()])
+      const [list, content] = await Promise.all([listProducts(), getSiteContent('collection')])
       const merged = mergePage(collectionDefaults, content)
       const known = new Set(list.map(p => p.id))
-      // Nunca salvo: começa com as peças da categoria antiga "Coleção Dezembro".
-      const legacy = categories.find(c => c.slug === LEGACY_CATEGORY)
-      const legacyIds = legacy ? list.filter(p => (p.product_categories || []).some(pc => pc.category_id === legacy.id)).map(p => p.id) : []
-      merged.productIds = (Array.isArray(merged.productIds) ? merged.productIds : legacyIds).filter(id => known.has(id))
+      merged.productIds = (Array.isArray(merged.productIds) ? merged.productIds : []).filter(id => known.has(id))
       setProducts(list); setSaved(merged); setForm(merged); setLoadError(null)
     } catch (e) { setLoadError(errorText(e)) }
   }
   useEffect(() => { load() }, [])
 
-  const dirty = Boolean(form && saved) && JSON.stringify(form) !== JSON.stringify(saved)
+  const snapshot = value => JSON.stringify(value, (k, v) => (v && typeof v === 'object' && v.preview ? `nova:${v.preview}` : v))
+  const dirty = Boolean(form && saved) && snapshot(form) !== snapshot(saved)
   useUnsavedGuard(dirty && !saving)
 
   const byId = useMemo(() => Object.fromEntries((products || []).map(p => [p.id, p])), [products])
@@ -94,9 +91,10 @@ export default function CollectionPage() {
     if (problemText) return setError(problemText)
     setSaving(true); setError(null)
     try {
-      const value = { ...form }
-      textSchema.forEach(f => { value[f.key] = clean(form[f.key]) })
+      const value = { ...form, ...(await finalize(textSchema, form, 'paginas')) }
       await saveSiteContent('collection', value)
+      const now = new Set(imagesOf(textSchema, value).map(i => i.url))
+      await Promise.all(imagesOf(textSchema, saved).filter(i => !now.has(i.url)).map(i => removeSiteImage(i.url, i.suffixes)))
       setSaved(value); setForm(value)
       toast('Coleção salva. O site já mostra a versão nova.')
     } catch (e) { setError(errorText(e)) }
@@ -106,7 +104,7 @@ export default function CollectionPage() {
   return (
     <div className="adm-editor">
       <div className="adm-page-head">
-        <p className="adm-muted adm-title-info">A página de coleção do site.<InfoTip>{'Troque o nome, os textos e as peças sempre que mudar a coleção (do mês, de estação, de data especial…).\n\nO nome também aparece no menu do topo. O endereço da página é sempre usemare.com.br/colecao.'}</InfoTip></p>
+        <p className="adm-muted adm-title-info">A página de coleção especial do site.<InfoTip>{'Troque o nome, os textos e as peças sempre que mudar a coleção (Natal, Páscoa, Dia das Mães, Batizado…).\n\nO nome também aparece no menu do topo. O endereço da página é sempre artescomfe.com.br/colecao.'}</InfoTip></p>
         <span className="adm-head-actions">
           <a className="adm-btn outline small" href={COLLECTION_PATH} target="_blank" rel="noreferrer"><ExternalLink /> Ver no site</a>
         </span>
@@ -114,17 +112,17 @@ export default function CollectionPage() {
       {error && <p className="adm-notice is-error" role="alert">{error}</p>}
 
       <section className="adm-card">
-        <CardHead title="Topo da página" text="Nome, títulos e selo." />
+        <CardHead title="Topo da página" text="Nome, títulos e foto."
+          aside={<Switch checked={!!form.showInMenu} onChange={v => set('showInMenu', v)} label={form.showInMenu ? 'Aparece no menu do topo' : 'Fora do menu (só pelo link)'} />} />
         <Fields schema={topSchema} value={form} onChange={setForm} />
-        <Switch checked={form.festive} onChange={v => set('festive', v)} label={form.festive ? 'Enfeites dourados ligados' : 'Enfeites dourados desligados'} />
       </section>
 
       <div className="adm-spot-grid">
         <section className="adm-card">
-          <CardHead title={`Peças da coleção (${chosen.length})`} text="Na ordem em que aparecem."
-            info="As peças aparecem na página nesta ordem. Peças ocultas não aparecem; indisponíveis aparecem sem preço, com o selo." />
+          <CardHead title={`Produtos da coleção (${chosen.length})`} text="Na ordem em que aparecem."
+            info="Os produtos aparecem na página nesta ordem. Ocultos não aparecem; indisponíveis aparecem com o selo." />
           {chosen.length === 0 ? (
-            <div className="adm-empty"><Sparkles /><b>Nenhuma peça escolhida</b>Adicione pela lista ao lado.</div>
+            <div className="adm-empty"><Sparkles /><b>Nenhum produto escolhido</b>Adicione pela lista ao lado.</div>
           ) : (
             <ol className="adm-spot-list">
               {chosen.map((p, i) => (
@@ -149,7 +147,7 @@ export default function CollectionPage() {
         </section>
 
         <section className="adm-card">
-          <CardHead title="Adicionar peça" />
+          <CardHead title="Adicionar produto" />
           <label className="adm-search"><Search /><input className="adm-input" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por nome ou código" aria-label="Buscar produto" /></label>
           <ul className="adm-spot-options">
             {options.length === 0 && <li className="adm-muted">Nenhum produto encontrado.</li>}

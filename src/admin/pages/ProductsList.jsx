@@ -205,7 +205,7 @@ export default function ProductsList() {
           </span>
         </div>
       )}
-      {!filtering && !order && products.length > 1 && <p className="adm-hint adm-order-hint"><GripVertical /> Arraste para mudar a ordem no site.<InfoTip>Arraste pelos pontinhos (ou use as setas) para mudar a ordem em que os produtos aparecem no site.</InfoTip></p>}
+      {!filtering && !order && products.length > 1 && <p className="adm-hint adm-order-hint"><GripVertical /> Ordem do site<InfoTip>Arraste pelos pontinhos (ou use as setas) para mudar a ordem em que os produtos aparecem no site.</InfoTip></p>}
 
       {visible.length === 0 ? (
         <div className="adm-card adm-empty">
@@ -252,6 +252,7 @@ export default function ProductsList() {
                 <span className="adm-prow-switches">
                   <Switch checked={p.active} onChange={v => patch(p, { active: v }, v ? 'Produto visível no site.' : 'Produto oculto: não aparece mais no site.')} label="No site" />
                   <Switch checked={p.available} onChange={v => patch(p, { available: v }, v ? 'Produto disponível para compra.' : 'Produto indisponível: continua no site, sem preço.')} label="Disponível" />
+                  <Switch checked={!!p.is_new} onChange={v => patch(p, { is_new: v }, v ? 'Marcado como Novidade: ganha o selo e entra em "Novidades".' : 'Selo de Novidade removido.')} label="Novidade" />
                 </span>
                 <span className="adm-prow-actions">
                   <Link className="adm-icon-btn" to={`${BASE}/produtos/${p.id}`} title="Editar" aria-label={`Editar ${p.name}`}><Pencil /></Link>

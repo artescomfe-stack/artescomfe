@@ -6,12 +6,12 @@ export const BASE = '/painel-loja'
 export const sections = {
   inicio:        { label: 'Início',          icon: LayoutDashboard, path: BASE,                          stage: 12, description: 'Resumo da loja e atalhos.' },
   produtos:      { label: 'Produtos',        icon: Package,         path: `${BASE}/produtos`,            stage: 4,  description: 'Cadastrar, editar e organizar as imagens.' },
-  categorias:    { label: 'Categorias',      icon: Tags,            path: `${BASE}/categorias`,          stage: 7,  description: 'Coleções, tipos de peça e cards.' },
+  categorias:    { label: 'Categorias',      icon: Tags,            path: `${BASE}/categorias`,          stage: 7,  description: 'Devoções, linhas e atalhos da página inicial.' },
   destaques:     { label: 'Flutuantes',      icon: PictureInPicture2,path: `${BASE}/flutuantes`,          stage: 8,  description: 'Produtos do card flutuante.' },
   paginaInicial: { label: 'Página inicial',  icon: House,           path: `${BASE}/pagina-inicial`,      stage: 9,  description: 'Banner, vitrine e textos do Início.' },
-  colecao:       { label: 'Coleção',         icon: Gift,            path: `${BASE}/colecao`,             stage: 11, description: 'Nome, textos e peças da coleção.' },
+  colecao:       { label: 'Coleção',         icon: Gift,            path: `${BASE}/colecao`,             stage: 11, description: 'Nome, textos e produtos da coleção.' },
   menuSite:      { label: 'Menu do site',    icon: Menu,            path: `${BASE}/menu-do-site`,        stage: 11, description: 'Nomes das páginas no menu.' },
-  paginas:       { label: 'Textos das páginas', icon: FileText,     path: `${BASE}/paginas`,             stage: 10, description: 'Sobre, catálogo, promoções e avisos.' },
+  paginas:       { label: 'Textos das páginas', icon: FileText,     path: `${BASE}/paginas`,             stage: 10, description: 'Sobre, como comprar, catálogo, ofertas e faixa do topo.' },
   clientes:      { label: 'Clientes',        icon: Users,           path: `${BASE}/clientes`,            stage: 12, description: 'Contas e WhatsApp dos clientes.' },
   avaliacoes:    { label: 'Avaliações',      icon: Star,            path: `${BASE}/avaliacoes`,          stage: 12, description: 'Aprovar ou recusar avaliações.' },
   newsletter:    { label: 'Newsletter',      icon: Mail,            path: `${BASE}/newsletter`,          stage: 12, description: 'E-mails inscritos no rodapé.' },
@@ -21,10 +21,9 @@ export const sections = {
 }
 
 // Configurações fica fixo no rodapé do menu (ver AdminApp).
-// Etapa 1 do painel da Artes com Fé. Categorias, página inicial, textos, logo/rodapé e destaques
-// entram na etapa 2 (quando o site passar a ler esses conteúdos do banco).
 export const navGroups = [
   { label: null,       items: ['inicio'] },
-  { label: 'Loja',     items: ['produtos'] },
+  { label: 'Loja',     items: ['produtos', 'categorias', 'destaques'] },
+  { label: 'Site',     items: ['paginaInicial', 'colecao', 'menuSite', 'paginas', 'aparencia'] },
   { label: 'Clientes', items: ['clientes', 'avaliacoes', 'newsletter'] },
 ]

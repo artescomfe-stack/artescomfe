@@ -8,6 +8,8 @@ import { Instagram, Price, ProductCard, SectionHeading, WhatsApp } from '../ui.j
 import { productMessage, restockMessage, store, whatsappLink } from '../store.js'
 import NotFound from './NotFound.jsx'
 import { supabase } from '../supabase.js'
+import { pageContent } from '../content.js'
+import { SiteIcon } from '../icons.jsx'
 
 // Breadcrumb, etiqueta e "Você também pode gostar" seguem a categoria (Nossa Senhora, Santos…).
 const lineLabel = product => typeLabels[product.type] || 'Loja'
@@ -83,11 +85,38 @@ function Gallery({ product }) {
   )
 }
 
+// Textos fixos da página do produto (painel → Textos das páginas → Página do produto; site_content 'product').
+export const productPageDefaults = {
+  tabAbout: 'Sobre a imagem',
+  tabCare: 'Medidas e cuidados',
+  tabHow: 'Como comprar',
+  tabShipping: 'Envio',
+  noMeasures: 'As medidas exatas desta imagem são informadas no WhatsApp — é só pedir que enviamos na hora. 🙏',
+  care: 'Para conservar o acabamento, limpe apenas com pano macio e seco, sem produtos químicos, e evite deixar a imagem exposta ao sol forte ou à umidade.',
+  howSteps: [
+    { text: 'Toque em *Comprar pelo WhatsApp* (ou junte várias imagens na sacola).' },
+    { text: 'A mensagem já vai pronta com a imagem escolhida — é só enviar.' },
+    { text: 'Combinamos pagamento, frete e entrega na conversa. 💬' },
+  ],
+  shipping: '📦 Entrega combinada pelo WhatsApp, com embalagem reforçada para a imagem chegar perfeita.',
+  shippingNote: 'Valor e prazo do frete são calculados para o seu CEP e combinados no WhatsApp junto com o pedido.',
+  buyNote: 'Pagamento, frete e entrega você combina com a gente direto no WhatsApp. 💬',
+  soldOutText: 'No momento ela está indisponível, mas podemos avisar você quando voltar — ou ajudar a encomendar. Novidades chegam primeiro no nosso Instagram.',
+  perks: [
+    { icon: 'truck', title: 'Entrega combinada', text: 'Frete e prazo no WhatsApp' },
+    { icon: 'chat', title: 'Atendimento humanizado', text: 'Tire dúvidas antes de comprar' },
+    { icon: 'heart', title: 'Embalado com carinho', text: 'Cada pedido é especial' },
+  ],
+}
+const pageTexts = () => pageContent('product', productPageDefaults)
+// *texto* → negrito (mesmo jeito do WhatsApp)
+const Bold = ({ text }) => String(text || '').split(/\*([^*]+)\*/g).map((part, i) => i % 2 ? <strong key={i}>{part}</strong> : part)
+
 const tabsFor = () => [
-  { key: 'peca', label: 'Sobre a imagem' },
-  { key: 'cuidados', label: 'Medidas e cuidados' },
-  { key: 'comprar', label: 'Como comprar' },
-  { key: 'envio', label: 'Envio' },
+  { key: 'peca', label: () => pageTexts().tabAbout },
+  { key: 'cuidados', label: () => pageTexts().tabCare },
+  { key: 'comprar', label: () => pageTexts().tabHow },
+  { key: 'envio', label: () => pageTexts().tabShipping },
 ]
 
 function InfoTabs({ product }) {
@@ -96,7 +125,7 @@ function InfoTabs({ product }) {
   return (
     <div className="pdp-tabs" data-reveal>
       <div className="tab-list" role="tablist">
-        {tabs.map(t => <button key={t.key} role="tab" aria-selected={tab === t.key} className={tab === t.key ? 'active' : ''} onClick={() => setTab(t.key)}>{t.label}</button>)}
+        {tabs.map(t => <button key={t.key} role="tab" aria-selected={tab === t.key} className={tab === t.key ? 'active' : ''} onClick={() => setTab(t.key)}>{typeof t.label === 'function' ? t.label() : t.label}</button>)}
       </div>
       <div className="tab-panel" role="tabpanel" key={tab}>
         {tab === 'peca' && <>
@@ -107,23 +136,22 @@ function InfoTabs({ product }) {
             {product.finish && <li><span>Acabamento</span><b>{product.finish}</b></li>}
             {product.material && <li><span>Material</span><b>{product.material}</b></li>}
             {product.dimensions && <li><span>Medidas</span><b>{product.dimensions}</b></li>}
+            {(product.details || []).filter(d => d?.label && d?.value).map((d, i) => <li key={i}><span>{d.label}</span><b>{d.value}</b></li>)}
             <li><span>Fotos</span><b>{product.photos.length} ângulos da imagem</b></li>
           </ul>
         </>}
         {tab === 'cuidados' && <>
-          <p>{product.dimensions ? <>Medidas aproximadas: <b>{product.dimensions}</b>.</> : 'As medidas exatas desta imagem são informadas no WhatsApp — é só pedir que enviamos na hora. 🙏'}</p>
-          <p className="muted">Para conservar o acabamento, limpe apenas com pano macio e seco, sem produtos químicos, e evite deixar a imagem exposta ao sol forte ou à umidade.</p>
+          <p>{product.dimensions ? <>Medidas aproximadas: <b>{product.dimensions}</b>.</> : pageTexts().noMeasures}</p>
+          {pageTexts().care && <p className="muted">{pageTexts().care}</p>}
         </>}
         {tab === 'comprar' && (
           <ol className="steps-mini">
-            <li><b>1</b><span>Toque em <strong>Comprar pelo WhatsApp</strong> (ou junte várias imagens na sacola).</span></li>
-            <li><b>2</b><span>A mensagem já vai pronta com a imagem escolhida — é só enviar.</span></li>
-            <li><b>3</b><span>Combinamos pagamento, frete e entrega na conversa. 💬</span></li>
+            {(pageTexts().howSteps || []).filter(step => step?.text).map((step, i) => <li key={i}><b>{i + 1}</b><span><Bold text={step.text} /></span></li>)}
           </ol>
         )}
         {tab === 'envio' && <>
-          <p>📦 Entrega combinada pelo WhatsApp, com embalagem reforçada para a imagem chegar perfeita.</p>
-          <p className="muted">Valor e prazo do frete são calculados para o seu CEP e combinados no WhatsApp junto com o pedido.</p>
+          <p>{pageTexts().shipping}</p>
+          {pageTexts().shippingNote && <p className="muted">{pageTexts().shippingNote}</p>}
         </>}
       </div>
     </div>
@@ -276,7 +304,7 @@ export default function Product() {
             <h1>{product.name}</h1>
             <div className="pdp-price">
               <Price product={product} />
-              {product.available && <small>ou {product.installments} sem juros</small>}
+              {product.available && product.installments && <small>ou {product.installments} {product.installmentsNote}</small>}
             </div>
             <p className="pdp-intro">{intro}</p>
             <p className="pdp-description">{rest.join('\n\n')}</p>
@@ -298,12 +326,12 @@ export default function Product() {
                   <button className="button outline" onClick={() => addToBag(product)}><ShoppingBag /> Adicionar à sacola</button>
                   <button className={`like-big ${isLiked ? 'liked' : ''}`} onClick={() => toggleLike(product.id)} aria-label={isLiked ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}><Heart fill={isLiked ? 'currentColor' : 'none'} /></button>
                 </div>
-                <p className="modal-note">Pagamento, frete e entrega você combina com a gente direto no WhatsApp. 💬</p>
+                {pageTexts().buyNote && <p className="modal-note">{pageTexts().buyNote}</p>}
               </>
             ) : (
               <div className="soldout-notice" role="status">
                 <strong>Esta imagem esgotou</strong>
-                <p>No momento ela está indisponível, mas podemos avisar você quando voltar — ou ajudar a encomendar. Novidades chegam primeiro no nosso Instagram.</p>
+                <p>{pageTexts().soldOutText}</p>
                 <div className="modal-actions">
                   <a className="button outline" href={whatsappLink(restockMessage(product))} target="_blank" rel="noreferrer"><WhatsApp /> Avise-me se voltar</a>
                   <a className="button dark" href={store.instagram} target="_blank" rel="noreferrer"><Instagram /> Ver novidades</a>
@@ -312,9 +340,7 @@ export default function Product() {
             )}
 
             <ul className="pdp-perks">
-              <li><Truck /><span><b>Entrega combinada</b>Frete e prazo no WhatsApp</span></li>
-              <li><WhatsApp /><span><b>Atendimento humanizado</b>Tire dúvidas antes de comprar</span></li>
-              <li><Heart /><span><b>Embalado com carinho</b>Cada pedido é especial</span></li>
+              {(pageTexts().perks || []).filter(perk => perk?.title).map((perk, i) => <li key={i}><SiteIcon name={perk.icon} /><span><b>{perk.title}</b>{perk.text}</span></li>)}
             </ul>
           </div>
         </div>

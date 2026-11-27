@@ -7,6 +7,8 @@ import { helloMessage, whatsappLink } from '../store.js'
 import { products } from '../products.js'
 import { supabase } from '../supabase.js'
 import Account from './Account.jsx'
+import { pageContent } from '../content.js'
+import { Lines } from '../ui.jsx'
 
 // Login / criar conta / recuperar senha / minha conta — tudo pelo Supabase Auth.
 // O nome vai em options.data.full_name: o banco cria o perfil (public.profiles) sozinho.
@@ -181,17 +183,24 @@ function NewPassword() {
   )
 }
 
+// Lado esquerdo da tela de entrar (painel → Textos das páginas → Entrar; site_content 'login').
+export const loginDefaults = {
+  eyebrow: 'Sua conta Artes com Fé',
+  title: 'Faça parte\nda nossa história.',
+}
+
 export default function Login() {
   const { user, authReady, recovering } = useShop()
   const view = recovering ? 'nova-senha' : user ? 'conta' : 'entrar'
+  const texts = pageContent('login', loginDefaults)
   if (authReady && view === 'conta') return <Account />
 
   return (
     <section className="login-page">
       <div className="login-brand">
         <div className="login-brand-inner">
-          <p className="eyebrow">Sua conta Artes com Fé</p>
-          <h1>{view === 'conta' ? <>Que bom ter<br /><em>você aqui.</em></> : <>Faça parte<br /><em>da nossa história.</em></>}</h1>
+          {texts.eyebrow && <p className="eyebrow">{texts.eyebrow}</p>}
+          <h1><Lines text={texts.title} lastEm /></h1>
           <img className="login-logo" src="/img/logo/logo-claro.webp" alt="" aria-hidden="true" />
         </div>
       </div>

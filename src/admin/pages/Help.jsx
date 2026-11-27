@@ -39,6 +39,38 @@ const topics = [
     </>,
   },
   {
+    title: 'Categorias e atalhos da página inicial',
+    body: <>
+      <p><b>Devoções</b> (Nossa Senhora, Santos…) aparecem nos botões do catálogo, no filtro e nos atalhos redondos da página inicial. <b>Linhas</b> (Imagens sacras, Quadros…) dizem o tipo de produto.</p>
+      <ul>
+        <li>As setas mudam a ordem dos botões de categoria no catálogo.</li>
+        <li>Ao editar uma categoria você troca a <b>foto e os textos do topo</b> da página dela e liga o <b>atalho redondo</b> na página inicial.</li>
+        <li>Para esconder uma categoria sem apagar, desligue <b>Ativa</b>.</li>
+      </ul>
+      {go('/categorias', 'Ir para Categorias')}
+    </>,
+  },
+  {
+    title: 'Flutuantes',
+    body: <>
+      <p>Um card pequeno no canto do site que mostra até <b>5 produtos</b>, trocando sozinho. Esgotados e ocultos saem do card sozinhos.</p>
+      {go('/flutuantes', 'Ir para Flutuantes')}
+    </>,
+  },
+  {
+    title: 'Página inicial, Coleção, Menu e Textos',
+    body: <>
+      <ul>
+        <li><b>Página inicial:</b> banners do topo (com os cartões "Peça em destaque"), benefícios, títulos das vitrines, os dois banners do meio e o quadro "Por que comprar com a gente?".</li>
+        <li><b>Coleção:</b> uma página especial (artescomfe.com.br/colecao) para Natal, Páscoa, Dia das Mães… Escolha nome, textos, foto e os produtos; ligue "Aparece no menu" quando quiser divulgar.</li>
+        <li><b>Menu do site:</b> nomes dos itens do menu do topo.</li>
+        <li><b>Textos das páginas:</b> Sobre nós, Como comprar, topo do Catálogo, Ofertas e a <b>faixa do topo</b> (que passa de lado).</li>
+        <li><b>Logo e rodapé:</b> selo do topo, logo do rodapé, redes sociais, colunas de links, atendimento e a faixa da comunidade (newsletter).</li>
+      </ul>
+      {go('/pagina-inicial', 'Ir para Página inicial')}
+    </>,
+  },
+  {
     title: 'Clientes, avaliações e newsletter',
     body: <>
       <ul>
@@ -82,7 +114,6 @@ const topics = [
 export default function Help() {
   return (
     <>
-      <p className="adm-muted adm-intro">Guia rápido de cada parte do painel.</p>
       <div className="adm-help">
         {topics.map((t, i) => (
           <details key={t.title} className="adm-card" open={i === 0}>

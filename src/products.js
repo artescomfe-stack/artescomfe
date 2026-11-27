@@ -22,6 +22,13 @@ const thumbOf = photo => photo.replace(/\.webp$/, '-480.webp')
 const installments = (price, times = 2) =>
   `${times}x de R$ ${(price / times).toFixed(2).replace('.', ',')}`
 
+const installmentFields = product => {
+  const times = product.installmentsTimes || store.installments || 1
+  if (times <= 1) return { installments: null, installmentsNote: null }
+  const value = product.installmentValue || product.price / times
+  return { installments: `${times}x de R$ ${value.toFixed(2).replace('.', ',')}`, installmentsNote: product.installmentNote || 'sem juros' }
+}
+
 const formatPrice = price => `R$ ${price.toFixed(2).replace('.', ',')}`
 
 const BRONZE = 'linear-gradient(135deg,#6b4a2b,#a57a4c)'
@@ -664,7 +671,8 @@ const enrich = product => ({
   thumbs: product.thumbs || product.photos.map(thumbOf),
   photoStyle: product.photoAlign === 'bottom' ? { objectPosition: 'center bottom' } : undefined,
   priceLabel: formatPrice(product.price),
-  installments: installments(product.price, store.installments),
+  // Parcelamento: o do produto (painel → editor) ou o padrão da loja (Configurações). 1x = só à vista.
+  ...installmentFields(product),
 })
 
 // disponíveis primeiro, esgotadas no fim (mantendo a ordem do catálogo)
@@ -703,4 +711,5 @@ export const spotlightProducts = () => store.spotlight?.enabled
   ? (store.spotlight.ids || []).map(id => products.find(p => p.uuid === id || p.id === id)).filter(p => p?.available).slice(0, 5)
   : []
 
-export const findProduct = slug => products.find(product => product.slug === slug)
+// Endereços antigos (produto renomeado no painel) continuam abrindo o produto.
+export const findProduct = slug => products.find(product => product.slug === slug) || products.find(product => product.oldSlugs?.includes(slug))

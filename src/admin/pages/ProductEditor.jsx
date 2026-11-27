@@ -299,7 +299,7 @@ export default function ProductEditor() {
           </section>
 
           <section className="adm-card adm-ed-kind">
-            <div className="adm-card-head"><div><h2>Acabamento e medidas</h2><p>Aparecem na página do produto e no filtro de acabamento.</p></div></div>
+            <div className="adm-card-head"><div><h2 className="adm-title-info">Acabamento e medidas<InfoTip>Aparecem na ficha do produto e no filtro de acabamento do catálogo.</InfoTip></h2></div></div>
             <div className="adm-grid-2">
               <Field label="Acabamento" hint="Escolha um da lista ou escreva outro.">
                 <input list="adm-finishes" value={form.finish} onChange={e => setFinish(e.target.value)} placeholder="Ex.: Dourado" maxLength={40} />

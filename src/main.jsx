@@ -11,6 +11,7 @@ import Catalog from './pages/Catalog.jsx'
 import Product from './pages/Product.jsx'
 import About from './pages/About.jsx'
 import Promotions from './pages/Promotions.jsx'
+import Collection from './pages/Collection.jsx'
 import NotFound from './pages/NotFound.jsx'
 import Login from './pages/Login.jsx'
 
@@ -22,6 +23,7 @@ const AdminApp = lazy(() => import('./admin/AdminApp.jsx'))
 //   /produtos             Catálogo completo (?categoria=, ?busca=, filtros)
 //   /produto/:slug        Página individual de cada imagem
 //   /promocoes            Promoções
+//   /colecao              Coleção (nome, textos e produtos no painel → Coleção)
 //   /sobre                Sobre nós (+ #como-comprar)
 //   /entrar               Login / criar conta / Minha conta
 //   /painel-loja          Painel de administração (só contas admin)
@@ -36,6 +38,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="produtos" element={<Catalog />} />
             <Route path="produto/:slug" element={<Product />} />
             <Route path="promocoes" element={<Promotions />} />
+            <Route path="colecao" element={<Collection />} />
             <Route path="sobre" element={<About />} />
             <Route path="entrar" element={<Login />} />
             <Route path="*" element={<NotFound />} />

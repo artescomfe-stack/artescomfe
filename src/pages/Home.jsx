@@ -1,59 +1,99 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, ChevronLeft, ChevronRight, CreditCard, Gem, Gift, Headset, PackageCheck, ShieldCheck, Truck } from 'lucide-react'
-import { collections, products } from '../products.js'
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
+import { categories, collections, products } from '../products.js'
 import { usePageTitle, useShop } from '../shop.jsx'
-import { ProductCard, SectionHeading, responsive } from '../ui.jsx'
+import { Lines, ProductCard, SectionHeading, SmartLink, responsive } from '../ui.jsx'
+import { store } from '../store.js'
+import { savedContent } from '../content.js'
+import { SiteIcon } from '../icons.jsx'
 
-// Rotativo do topo: para adicionar banners, inclua itens aqui (setas e bolinhas aparecem sozinhas).
-// Imagens em /public/img/banners: versão 3000px + versão -1200 (1500px).
-const heroSlides = [
-  {
-    image: '/img/banners/hero-sagrada-familia.webp',
-    alt: 'Imagem da Sagrada Família em marfim e dourado',
-    eyebrow: 'Arte sacra • Devoção • Tradição',
-    title: ['Peças sacras,', 'beleza e devoção'],
-    text: 'Imagens escolhidas com cuidado para fortalecer a sua fé e tornar o seu lar um espaço de oração e paz.',
-    cta: { label: 'Conheça a loja', to: '/produtos' },
-    features: ['08', '11'], // peças dos cartões "Peça em destaque" (códigos dos produtos)
-  },
-  {
-    image: '/img/banners/hero-nossa-senhora.webp',
-    alt: 'Imagem de Nossa Senhora de Fátima com manto de pérolas',
-    eyebrow: 'Coleção Nossa Senhora',
-    title: ['Maria, Mãe', 'e Rainha do lar'],
-    text: 'Aparecida, Fátima, Guadalupe e outras representações de Nossa Senhora, com acabamentos delicados.',
-    cta: { label: 'Ver coleção', to: '/produtos?categoria=nossa-senhora' },
-    features: ['04', '06'],
-  },
-]
-const heroSrcSet = image => `${image.replace('.webp', '-1200.webp')} 1500w, ${image} 3000w`
+// Textos e imagens da página inicial. Este é o padrão; o painel (Página inicial) substitui
+// campo a campo pelo que for salvo (tabela site_content, chave 'home').
+// Nos textos, Enter (\n) vira quebra de linha.
+export const homeDefaults = {
+  heroSlides: [
+    {
+      image: '/img/banners/hero-sagrada-familia.webp',
+      alt: 'Imagem da Sagrada Família em marfim e dourado',
+      eyebrow: 'Arte sacra • Devoção • Tradição',
+      title: 'Peças sacras,\nbeleza e devoção',
+      text: 'Imagens escolhidas com cuidado para fortalecer a sua fé e tornar o seu lar um espaço de oração e paz.',
+      button: 'Conheça a loja',
+      link: '/produtos',
+      features: '08, 11',
+    },
+    {
+      image: '/img/banners/hero-nossa-senhora.webp',
+      alt: 'Imagem de Nossa Senhora de Fátima com manto de pérolas',
+      eyebrow: 'Coleção Nossa Senhora',
+      title: 'Maria, Mãe\ne Rainha do lar',
+      text: 'Aparecida, Fátima, Guadalupe e outras representações de Nossa Senhora, com acabamentos delicados.',
+      button: 'Ver coleção',
+      link: '/produtos?categoria=nossa-senhora',
+      features: '04, 06',
+    },
+  ],
+  heroBenefits: [
+    { icon: 'gem', text: 'Acabamento\nsofisticado' },
+    { icon: 'gift', text: 'Presentes com\nsignificado' },
+    { icon: 'package', text: 'Embalado com\ncarinho' },
+  ],
+  featureLabel: 'Peça em destaque',
+  categoriesAll: 'Todas',
+  categoriesNew: 'Novidades',
+  bestTitle: 'Mais vendidos',
+  newsTitle: 'Novidades da loja',
+  banners: [
+    { image: '/img/banners/colecao-nossa-senhora.webp', title: 'Coleção\nNossa Senhora', text: 'Diversas representações de Maria para a sua devoção.', button: 'Ver coleção', link: '/produtos?categoria=nossa-senhora' },
+    { image: '/img/banners/presentes-de-fe.webp', title: 'Presentes\nde Fé', text: 'Peças especiais para batizados, casamentos e datas importantes.', button: 'Escolher presente', link: '/produtos' },
+  ],
+  // {parcelas} = número de parcelas das Configurações da loja.
+  reasonsTitle: 'Por que comprar com a gente?',
+  reasons: [
+    { icon: 'truck', title: 'Entrega combinada', text: 'Com embalagem reforçada' },
+    { icon: 'shield', title: 'Compra segura', text: 'Atendimento direto com a loja' },
+    { icon: 'card', title: 'Em até {parcelas}x sem juros', text: 'No cartão de crédito' },
+    { icon: 'headset', title: 'Atendimento humanizado', text: 'Tire dúvidas pelo WhatsApp' },
+    { icon: 'gem', title: 'Acabamento sofisticado', text: 'Riqueza em cada detalhe' },
+  ],
+}
 
-// Categorias do painel: `cover` = código da peça usada na foto redonda.
-const categoryItems = [
-  { key: 'todos', label: 'Todas', cover: '10' },
-  { key: 'nossa-senhora', label: 'Nossa Senhora', cover: '06' },
-  { key: 'santos', label: 'Santos', cover: '03' },
-  { key: 'sagrada-familia', label: 'Sagrada Família', cover: '08' },
-  { key: 'jesus-cristo', label: 'Jesus Cristo', cover: '07' },
-  { key: 'novidades', label: 'Novidades', cover: '02' },
-]
+// Campos obrigatórios: vazio = texto padrão. Campos opcionais: se foi apagado no painel, o site não mostra.
+const blank = v => v === undefined || v === null || v === '' || (Array.isArray(v) && !v.length)
+const OPTIONAL = ['heroBenefits', 'reasons', 'reasonsTitle', 'featureLabel']
+export const mergeHome = (saved = {}) => {
+  const c = { ...homeDefaults }
+  Object.entries(saved || {}).forEach(([k, v]) => {
+    if (!(k in homeDefaults)) return
+    c[k] = OPTIONAL.includes(k) ? (v === undefined || v === null ? homeDefaults[k] : v) : (blank(v) ? homeDefaults[k] : v)
+  })
+  const slides = (c.heroSlides || []).filter(s => s?.image)
+  return {
+    ...c,
+    heroSlides: slides.length ? slides : homeDefaults.heroSlides,
+    heroBenefits: (c.heroBenefits || []).filter(b => b?.text),
+    banners: homeDefaults.banners.map((base, i) => ({ ...base, ...Object.fromEntries(Object.entries(c.banners?.[i] || {}).filter(([k, v]) => k === 'text' || k === 'button' ? v !== undefined && v !== null : !blank(v))) })),
+    reasons: (c.reasons || []).filter(r => r?.title),
+  }
+}
+export const homeContent = () => mergeHome(savedContent('home'))
 
-const reasons = [
-  { icon: Truck, title: 'Entrega combinada', text: 'Com embalagem reforçada' },
-  { icon: ShieldCheck, title: 'Compra segura', text: 'Atendimento direto com a loja' },
-  { icon: CreditCard, title: 'Em até 2x sem juros', text: 'No cartão de crédito' },
-  { icon: Headset, title: 'Atendimento humanizado', text: 'Tire dúvidas pelo WhatsApp' },
-  { icon: Gem, title: 'Acabamento sofisticado', text: 'Riqueza em cada detalhe' },
-]
+const fill = text => String(text || '').replace(/\{parcelas\}/g, store.installments)
+// "08, 11" → produtos de código 08 e 11 (disponíveis)
+const featuresOf = codes => String(codes || '').split(/[\s,;]+/).filter(Boolean)
+  .map(code => products.find(p => p.id === code.padStart(2, '0') && p.available)).filter(Boolean).slice(0, 2)
+const heroSrcSet = image => responsive(image, 1200)
 
-function Hero() {
+function Hero({ content }) {
+  const slides = content.heroSlides
   const [current, setCurrent] = useState(0)
-  const multiple = heroSlides.length > 1
-  const go = step => setCurrent(index => (index + step + heroSlides.length) % heroSlides.length)
-  const slide = heroSlides[current]
-  const features = (slide.features || []).map(id => products.find(p => p.id === id && p.available)).filter(Boolean)
+  const multiple = slides.length > 1
+  const go = step => setCurrent(index => (index + step + slides.length) % slides.length)
+  const slide = slides[current] || slides[0]
+  const features = featuresOf(slide.features)
 
+  useEffect(() => { if (current >= slides.length) setCurrent(0) }, [slides.length, current])
   useEffect(() => {
     if (!multiple) return
     const timer = setInterval(() => go(1), 7000)
@@ -62,20 +102,20 @@ function Hero() {
 
   return (
     <section className="hero" id="inicio">
-      {heroSlides.map((item, index) => (
-        <img key={item.image} className={index === current ? 'active' : ''} src={item.image} srcSet={heroSrcSet(item.image)} sizes="100vw" alt={index === current ? item.alt : ''} fetchPriority={index === 0 ? 'high' : 'auto'} />
+      {slides.map((item, index) => (
+        <img key={item.image + index} className={index === current ? 'active' : ''} src={item.image} srcSet={heroSrcSet(item.image)} sizes="100vw" alt={index === current ? (item.alt || '') : ''} fetchPriority={index === 0 ? 'high' : 'auto'} />
       ))}
       <div className="hero-inner">
         <div className="hero-copy" key={current}>
-          <p className="eyebrow">{slide.eyebrow}</p>
-          <h1>{slide.title[0]}<br />{slide.title[1]}</h1>
-          <h2>{slide.text}</h2>
-          <Link className="button dark" to={slide.cta.to}>{slide.cta.label} <ArrowRight /></Link>
-          <ul className="hero-benefits">
-            <li><Gem /> <span>Acabamento<br />sofisticado</span></li>
-            <li><Gift /> <span>Presentes com<br />significado</span></li>
-            <li><PackageCheck /> <span>Embalado com<br />carinho</span></li>
-          </ul>
+          {slide.eyebrow && <p className="eyebrow">{slide.eyebrow}</p>}
+          <h1><Lines text={slide.title} /></h1>
+          {slide.text && <h2>{slide.text}</h2>}
+          {slide.button && <SmartLink className="button dark" to={slide.link}>{slide.button} <ArrowRight /></SmartLink>}
+          {content.heroBenefits.length > 0 && (
+            <ul className="hero-benefits">
+              {content.heroBenefits.map((b, i) => <li key={i}><SiteIcon name={b.icon} /> <span><Lines text={b.text} /></span></li>)}
+            </ul>
+          )}
         </div>
       </div>
       {features.length > 0 && (
@@ -84,10 +124,10 @@ function Hero() {
             <Link to={`/produto/${feature.slug}`} className="hero-feature" key={feature.id} style={{ '--i': i }}>
               <img src={feature.thumbs[0]} alt="" />
               <span>
-                <small>Peça em destaque</small>
+                {content.featureLabel && <small>{content.featureLabel}</small>}
                 <b>{feature.name}</b>
                 <strong>{feature.priceLabel}</strong>
-                <em>Ver imagem <ArrowRight /></em>
+                <em>Ver produto <ArrowRight /></em>
               </span>
             </Link>
           ))}
@@ -97,7 +137,7 @@ function Hero() {
         <button className="slider-arrow left" onClick={() => go(-1)} aria-label="Banner anterior"><ChevronLeft /></button>
         <button className="slider-arrow right" onClick={() => go(1)} aria-label="Próximo banner"><ChevronRight /></button>
         <div className="hero-dots">
-          {heroSlides.map((item, index) => <button key={item.image} className={index === current ? 'active' : ''} onClick={() => setCurrent(index)} aria-label={`Ir para o banner ${index + 1}`} />)}
+          {slides.map((item, index) => <button key={item.image + index} className={index === current ? 'active' : ''} onClick={() => setCurrent(index)} aria-label={`Ir para o banner ${index + 1}`} />)}
         </div>
       </>}
     </section>
@@ -121,8 +161,9 @@ function Shelf({ id, title, to, items }) {
 export default function Home() {
   usePageTitle(null)
   useShop() // redesenha quando o catálogo do Supabase chega
+  const content = homeContent()
   const available = products.filter(product => product.available)
-  // "Mais vendidos": por enquanto, a ordem do catálogo (sort_order no Supabase).
+  // "Mais vendidos": a ordem do catálogo (painel → Produtos → arrastar).
   const bestSellers = available.slice(0, 4)
   const used = new Set(bestSellers)
   const take = (list, n = 4) => {
@@ -132,19 +173,25 @@ export default function Home() {
   }
   const news = take([...available.filter(p => p.isNew), ...available])
 
-  const categories = categoryItems.map(item => {
-    const collection = collections.find(c => c.key === item.key)
-    const cover = products.find(p => p.id === item.cover) || products.find(p => collection.test(p))
-    return { ...item, photo: cover && (cover.thumbs[1] || cover.thumbs[0]), count: products.filter(collection.test).length }
-  }).filter(c => c.count)
+  // Atalhos redondos: "Todas" + categorias marcadas "na página inicial" (painel → Categorias) + "Novidades".
+  const firstPhoto = test => { const p = products.find(test); return p && (p.thumbs[1] || p.thumbs[0]) }
+  const homeCats = categories.filter(c => c.active && c.home_card).sort((a, b) => a.home_card_order - b.home_card_order)
+  const chips = [
+    { key: 'todos', label: content.categoriesAll, photo: products[0] && (products[0].thumbs[1] || products[0].thumbs[0]), count: products.length },
+    ...homeCats.map(c => {
+      const test = collections.find(x => x.key === c.slug)?.test || (p => p.categorySlugs.includes(c.slug))
+      return { key: c.slug, label: (c.home_title || c.name).replace(/\n/g, ' '), photo: c.home_image || firstPhoto(test), count: products.filter(test).length }
+    }),
+    content.categoriesNew && { key: 'novidades', label: content.categoriesNew, photo: firstPhoto(p => p.isNew), count: products.filter(p => p.isNew).length },
+  ].filter(c => c && c.count && c.label)
 
   return (
     <>
-      <Hero />
+      <Hero content={content} />
 
       <section className="shell category-panel-wrap" aria-label="Categorias">
         <div className="category-panel" data-reveal>
-          {categories.map(c => (
+          {chips.map(c => (
             <Link to={c.key === 'todos' ? '/produtos' : `/produtos?categoria=${c.key}`} className="category-chip" key={c.key}>
               <span><img src={c.photo || '/img/placeholder-produto.webp'} alt="" loading="lazy" /></span>
               <b>{c.label}</b>
@@ -153,39 +200,35 @@ export default function Home() {
         </div>
       </section>
 
-      <Shelf id="mais-vendidos" title="Mais vendidos" to="/produtos" items={bestSellers} />
+      <Shelf id="mais-vendidos" title={content.bestTitle} to="/produtos" items={bestSellers} />
 
       <section className="shell collection-row" aria-label="Coleções">
-        <Link to="/produtos?categoria=nossa-senhora" className="collection-banner" data-reveal>
-          <img src="/img/banners/colecao-nossa-senhora.webp" srcSet={responsive('/img/banners/colecao-nossa-senhora.webp', 800)} sizes="(max-width: 900px) 100vw, 50vw" alt="" loading="lazy" />
-          <div>
-            <h2>Coleção<br />Nossa Senhora</h2>
-            <p>Diversas representações de Maria para a sua devoção.</p>
-            <span className="button dark small">Ver coleção <ArrowRight /></span>
-          </div>
-        </Link>
-        <Link to="/produtos" className="collection-banner" data-reveal style={{ '--i': 1 }}>
-          <img src="/img/banners/presentes-de-fe.webp" srcSet={responsive('/img/banners/presentes-de-fe.webp', 800)} sizes="(max-width: 900px) 100vw, 50vw" alt="" loading="lazy" />
-          <div>
-            <h2>Presentes<br />de Fé</h2>
-            <p>Peças especiais para batizados, casamentos e datas importantes.</p>
-            <span className="button dark small">Escolher presente <ArrowRight /></span>
-          </div>
-        </Link>
+        {content.banners.map((banner, i) => (
+          <SmartLink key={i} to={banner.link} className="collection-banner" data-reveal style={i ? { '--i': i } : undefined}>
+            <img src={banner.image} srcSet={responsive(banner.image, 800)} sizes="(max-width: 900px) 100vw, 50vw" alt="" loading="lazy" />
+            <div>
+              <h2><Lines text={banner.title} /></h2>
+              {banner.text && <p>{banner.text}</p>}
+              {banner.button && <span className="button dark small">{banner.button} <ArrowRight /></span>}
+            </div>
+          </SmartLink>
+        ))}
       </section>
 
-      <Shelf id="novidades" title="Novidades da loja" to="/produtos?categoria=novidades" items={news} />
+      <Shelf id="novidades" title={content.newsTitle} to="/produtos?categoria=novidades" items={news} />
 
-      <section className="shell reasons-wrap" aria-labelledby="reasons-title">
-        <div className="reasons" data-reveal>
-          <h2 id="reasons-title">Por que comprar com a gente?</h2>
-          <ul>
-            {reasons.map(({ icon: Icon, title, text }) => (
-              <li key={title}><Icon /><span><b>{title}</b>{text}</span></li>
-            ))}
-          </ul>
-        </div>
-      </section>
+      {content.reasons.length > 0 && (
+        <section className="shell reasons-wrap" aria-labelledby="reasons-title">
+          <div className="reasons" data-reveal>
+            {content.reasonsTitle && <h2 id="reasons-title">{content.reasonsTitle}</h2>}
+            <ul>
+              {content.reasons.map((r, i) => (
+                <li key={i}><SiteIcon name={r.icon} /><span><b>{fill(r.title)}</b>{fill(r.text)}</span></li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
     </>
   )
 }

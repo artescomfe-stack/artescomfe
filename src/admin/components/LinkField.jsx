@@ -5,9 +5,12 @@ import { listCategories } from '../api.js'
 // value: '/produtos', '/produtos?categoria=vestidos', '/sobre', '{instagram}', 'https://…'
 const fixed = [
   { value: '/produtos', label: 'Catálogo completo' },
-  { value: '/promocoes', label: 'Promoções' },
-  { value: '/sobre', label: 'Sobre a Maré' },
+  { value: '/produtos?categoria=novidades', label: 'Novidades' },
+  { value: '/promocoes', label: 'Ofertas' },
+  { value: '/colecao', label: 'Coleção' },
+  { value: '/sobre', label: 'Sobre a Artes com Fé' },
   { value: '/sobre#como-comprar', label: 'Como comprar' },
+  { value: '/entrar', label: 'Entrar / Minha conta' },
   { value: '{whatsapp}', label: 'WhatsApp da loja (abre a conversa)' },
   { value: '{instagram}', label: 'Instagram da loja' },
 ]

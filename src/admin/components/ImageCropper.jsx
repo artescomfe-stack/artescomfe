@@ -147,7 +147,7 @@ export default function ImageCropper({ src, aspect = 3 / 4, outputs, title = 'Aj
         <button className="adm-btn primary" onClick={confirm} disabled={!img || busy}>{busy ? 'Preparando…' : confirmLabel}</button>
       </>}
     >
-      <p className="adm-hint adm-crop-hint"><Move /> Arraste a foto para posicionar e use o zoom para enquadrar. O que está dentro da moldura é o que aparece no site (proporção {ratioLabel}).</p>
+      <p className="adm-hint adm-crop-hint"><Move /> Arraste e use o zoom · {ratioLabel}</p>
       {error && <p className="adm-notice is-error">{error}</p>}
       <div className="adm-crop-stage">
         <div

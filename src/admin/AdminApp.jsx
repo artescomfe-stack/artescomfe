@@ -15,6 +15,13 @@ import Reviews from './pages/Reviews.jsx'
 import Newsletter from './pages/Newsletter.jsx'
 import Customers from './pages/Customers.jsx'
 import Help from './pages/Help.jsx'
+import Categories from './pages/Categories.jsx'
+import Spotlight from './pages/Spotlight.jsx'
+import HomePage from './pages/HomePage.jsx'
+import PageTexts from './pages/PageTexts.jsx'
+import Appearance from './pages/Appearance.jsx'
+import MenuNames from './pages/MenuNames.jsx'
+import CollectionPage from './pages/CollectionPage.jsx'
 import { supabase } from '../supabase.js'
 import { ConfirmProvider, ToastProvider } from './ui.jsx'
 import PasswordModal from './components/PasswordModal.jsx'
@@ -26,6 +33,13 @@ import PasswordModal from './components/PasswordModal.jsx'
 const pages = {
   inicio: Dashboard,
   produtos: ProductsList,
+  categorias: Categories,
+  destaques: Spotlight,
+  paginaInicial: HomePage,
+  paginas: PageTexts,
+  aparencia: Appearance,
+  menuSite: MenuNames,
+  colecao: CollectionPage,
   configuracoes: Settings,
   clientes: Customers,
   avaliacoes: Reviews,
@@ -121,6 +135,7 @@ function UserMenu({ email, name, avatar }) {
           <div className="adm-usermenu-group">
             <a href="/" target="_blank" rel="noreferrer" role="menuitem">Ver loja <ExternalLink /></a>
             <Link to={sections.configuracoes.path} role="menuitem">Configurações da loja</Link>
+            <Link to={sections.aparencia.path} role="menuitem">Logo e rodapé</Link>
             <Link to={sections.ajuda.path} role="menuitem">Ajuda do painel</Link>
           </div>
           <div className="adm-usermenu-group">

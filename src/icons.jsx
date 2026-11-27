@@ -1,7 +1,7 @@
-import { CreditCard, Gem, Gift, Globe, Heart, HeartHandshake, Leaf, LockKeyhole, Mail, MessageCircle, Package, RefreshCw, Ruler, Shirt, ShoppingBag, Smile, Sparkles, Star, Sun, Truck, Waves, Zap } from 'lucide-react'
+import { BookOpen, Church, CreditCard, Cross, Flower2, Gem, Gift, Globe, Headset, Heart, HeartHandshake, Leaf, LockKeyhole, Mail, MessageCircle, Package, PackageCheck, RefreshCw, Ruler, ShieldCheck, ShoppingBag, Smile, Sparkles, Star, Sun, Truck, Zap } from 'lucide-react'
 import { Instagram } from './ui.jsx'
 
-// Ícones que a dona pode escolher no painel (benefícios do hero e quadro de serviços).
+// Ícones que dá para escolher no painel (benefícios do hero e quadro de serviços).
 // A chave é o que fica salvo no banco; mudar uma chave aqui quebra o que já foi salvo.
 export const siteIcons = {
   truck:     { label: 'Caminhão (entrega)',   Icon: Truck },
@@ -17,13 +17,18 @@ export const siteIcons = {
   star:      { label: 'Estrela',              Icon: Star },
   gift:      { label: 'Presente',             Icon: Gift },
   package:   { label: 'Caixa (pacote)',       Icon: Package },
-  shirt:     { label: 'Roupa',                Icon: Shirt },
+  cross:     { label: 'Cruz',                 Icon: Cross },
+  church:    { label: 'Igreja',               Icon: Church },
+  bible:     { label: 'Livro (Bíblia)',       Icon: BookOpen },
+  flower:    { label: 'Flor (lírio)',         Icon: Flower2 },
+  shield:    { label: 'Escudo (compra segura)', Icon: ShieldCheck },
+  headset:   { label: 'Fone (atendimento)',   Icon: Headset },
+  packageCheck: { label: 'Caixa conferida (embalagem)', Icon: PackageCheck },
   ruler:     { label: 'Fita métrica (medidas)', Icon: Ruler },
   refresh:   { label: 'Setas (troca)',        Icon: RefreshCw },
   chat:      { label: 'Conversa (atendimento)', Icon: MessageCircle },
   smile:     { label: 'Sorriso',              Icon: Smile },
   sun:       { label: 'Sol',                  Icon: Sun },
-  waves:     { label: 'Ondas (Maré)',         Icon: Waves },
   zap:       { label: 'Raio (energia)',       Icon: Zap },
 }
 

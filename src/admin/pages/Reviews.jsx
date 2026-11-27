@@ -70,7 +70,7 @@ export default function Reviews() {
 
   return (
     <>
-      <p className="adm-muted adm-intro adm-title-info">Só aparecem no site depois de aprovadas.<InfoTip>As clientes avaliam pela página do produto (precisam estar logadas). Nada aparece no site antes de você aprovar.</InfoTip></p>
+      <p className="adm-muted adm-intro adm-title-info">Avaliações<InfoTip>Os clientes avaliam pela página do produto (logados). Nada aparece no site antes de você aprovar.</InfoTip></p>
       <nav className="adm-tabs" aria-label="Filtrar avaliações">
         {FILTERS.map(f => {
           const n = f.key === 'todas' ? reviews.length : counts[f.key] || 0

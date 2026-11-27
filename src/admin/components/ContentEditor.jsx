@@ -181,7 +181,7 @@ export default function ContentEditor({ contentKey, defaults, schema, intro, inf
   return (
     <div className="adm-editor">
       <div className="adm-page-head">
-        <p className="adm-muted adm-title-info">{intro}<InfoTip>{`${info ? `${info}\n\n` : ''}Campos com * não podem ficar vazios. Os outros, se apagados, somem do site.`}</InfoTip></p>
+        <p className="adm-muted adm-title-info">{intro}<InfoTip>{`${info ? `${info}\n\n` : ''}* = obrigatório. Campo opcional apagado some do site.`}</InfoTip></p>
         <span className="adm-head-actions">
           <button className="adm-btn ghost small" onClick={restore} disabled={saving}>Voltar ao padrão</button>
           {previewUrl && <a className="adm-btn outline small" href={previewUrl} target="_blank" rel="noreferrer"><ExternalLink /> Ver no site</a>}

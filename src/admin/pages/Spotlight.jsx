@@ -25,9 +25,9 @@ function Preview({ product, count }) {
     <div className="adm-spot-preview" aria-label="Prévia do card flutuante">
       <span className="adm-spot-preview-img">{product.product_images[0] ? <img src={product.product_images[0].thumb_path} alt="" /> : <ImageOff />}</span>
       <span className="adm-spot-preview-text">
-        <small>Destaque da Maré</small>
+        <small>Destaque da Artes com Fé</small>
         <b>{product.name}</b>
-        <span>{formatBRL(product.price)} · Ver peça <ArrowUpRight /></span>
+        <span>{formatBRL(product.price)} · Ver produto <ArrowUpRight /></span>
       </span>
       <span className="adm-spot-preview-dots">{Array.from({ length: count }, (_, i) => <i key={i} className={i === 0 ? 'active' : ''} />)}</span>
     </div>
@@ -94,7 +94,7 @@ export default function Spotlight() {
 
   return (
     <>
-      <p className="adm-muted adm-intro adm-title-info">Card flutuante no canto do site.<InfoTip>{`Até ${MAX} produtos aparecem em um card no canto do site, trocando a cada 5 segundos. O primeiro da lista aparece primeiro.\n\nProdutos ocultos ou esgotados ficam fora do card sozinhos e voltam quando estiverem disponíveis.`}</InfoTip></p>
+      <p className="adm-muted adm-intro adm-title-info">Card flutuante<InfoTip>{`Até ${MAX} produtos num card no canto do site, trocando a cada 5 s, na ordem da lista.\n\nOcultos ou esgotados saem do card sozinhos.`}</InfoTip></p>
 
       <div className="adm-spot-grid">
         <section className="adm-card">
@@ -129,7 +129,7 @@ export default function Spotlight() {
             <>
               <h3 className="adm-subtitle">Prévia</h3>
               <Preview product={showing[0]} count={showing.length} />
-              {showing.length < chosen.length && <p className="adm-hint">Ocultos ou esgotados ficam fora do card.</p>}
+              
             </>
           )}
         </section>
