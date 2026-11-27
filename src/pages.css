@@ -1257,3 +1257,7 @@ footer form button svg { width: 18px; }
 .cat-arch:hover { transform: translateY(-6px); border-color: var(--gold); }
 .cat-hero-count { margin: clamp(20px, 2.6vw, 30px) 0 0; color: rgba(243, 233, 218, .75); font-size: 14px; letter-spacing: .04em; }
 .cat-hero-count b { color: var(--gold-soft); font-size: 16px; }
+
+/* Foto de perfil no ícone da conta (topo e menu do celular) */
+.account-photo { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 1.5px var(--line); }
+.drawer-account .account-photo { width: 22px; height: 22px; }

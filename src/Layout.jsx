@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate, useNavigationType, useSearchParams } from 'react-router-dom'
 import { ArrowRight, CreditCard, Heart, LockKeyhole, Menu, Minus, Plus, Search, ShoppingBag, Trash2, Truck, UserRound, X } from 'lucide-react'
+import { trackPage } from './track.js'
 import { useRevealObserver, useShop } from './shop.jsx'
 import { Brand, HandHeart, Instagram, WhatsApp } from './ui.jsx'
 import { bagMessage, helloMessage, store, whatsappLink } from './store.js'
@@ -128,7 +129,9 @@ export default function Layout() {
   const location = useLocation()
   const [params] = useSearchParams()
   const [menuOpen, setMenuOpen] = useState(false)
-  const { bagCount, openBag, toast, dismissToast, user } = useShop()
+  const { bagCount, openBag, toast, dismissToast, user, profile } = useShop()
+  const accountIcon = profile?.avatar_url ? <img className="account-photo" src={profile.avatar_url} alt="" /> : <UserRound />
+  useEffect(() => { trackPage(location.pathname) }, [location.pathname])
   useRevealObserver()
 
   // Ao trocar de página: volta ao topo (ou rola até a âncora #) e fecha o menu.
@@ -172,7 +175,7 @@ export default function Layout() {
           </nav>
           <SearchBox />
           <div className="header-actions">
-            <Link to="/entrar" className={`header-action hide-small account-link ${user ? 'logged' : ''}`} aria-label={user ? 'Minha conta' : 'Entrar na minha conta'} title={user ? 'Minha conta' : 'Entrar'}><UserRound />{user && <i aria-hidden="true" />}</Link>
+            <Link to="/entrar" className={`header-action hide-small account-link ${user ? 'logged' : ''}`} aria-label={user ? 'Minha conta' : 'Entrar na minha conta'} title={user ? 'Minha conta' : 'Entrar'}>{accountIcon}{user && <i aria-hidden="true" />}</Link>
             <Link to="/entrar" className="header-action hide-small" aria-label="Meus favoritos" title="Favoritos"><Heart /></Link>
             <button className="header-action cart" onClick={openBag} aria-label={`Sacola com ${bagCount} itens`} title="Sacola"><ShoppingBag /><b key={bagCount} className={bagCount ? 'bump' : ''}>{bagCount}</b></button>
             <a className="header-whats" href={whatsappLink(helloMessage)} target="_blank" rel="noreferrer" aria-label="Falar com a Artes com Fé no WhatsApp"><WhatsApp /><span>WhatsApp</span></a>
@@ -183,7 +186,7 @@ export default function Layout() {
       <div className={`drawer ${menuOpen ? 'open' : ''}`} aria-hidden={!menuOpen}>
         <div className="drawer-head"><Brand horizontal onClick={() => setMenuOpen(false)} /><button className="icon-button" onClick={() => setMenuOpen(false)} aria-label="Fechar menu"><X /></button></div>
         {navItems.map(item => <Link to={item.to} key={item.label} className={isActive(item, location, params) ? 'active' : ''}>{item.label}<ArrowRight /></Link>)}
-        <Link to="/entrar" className="drawer-account"><UserRound /> {user ? 'Minha conta' : 'Entrar / criar conta'}</Link>
+        <Link to="/entrar" className="drawer-account">{user && profile?.avatar_url ? <img className="account-photo" src={profile.avatar_url} alt="" /> : <UserRound />} {user ? 'Minha conta' : 'Entrar / criar conta'}</Link>
         <a className="drawer-whats" href={whatsappLink(helloMessage)} target="_blank" rel="noreferrer"><WhatsApp /> Fale com a gente</a>
       </div>
       {menuOpen && <button className="backdrop" onClick={() => setMenuOpen(false)} aria-label="Fechar menu" />}

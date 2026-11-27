@@ -13,9 +13,6 @@ import './account.css'
 // Minha conta (cliente logada): cabeçalho com foto, abas Perfil / Favoritos / E-mail e senha
 // e o cartão de ações rápidas. A foto fica no bucket "avatares", na pasta com o id da cliente.
 
-// Enquanto o painel da loja não fica pronto, o atalho de admin abre o Supabase.
-const PANEL_URL = 'https://supabase.com/dashboard/project/gdiehxeroupeqytvvoyj/editor'
-
 const TABS = [
   { id: 'perfil', label: 'Perfil', Icon: UserRound },
   { id: 'favoritos', label: 'Favoritos', Icon: Heart },
@@ -312,7 +309,7 @@ export default function Account() {
   const since = memberSince(profile?.created_at || user.created_at)
 
   const quick = [
-    isAdmin && { key: 'painel', href: PANEL_URL, Icon: LayoutGrid, title: 'Painel da loja', text: 'Produtos, preços e avaliações', accent: true },
+    isAdmin && { key: 'painel', to: '/painel-loja', Icon: LayoutGrid, title: 'Painel da loja', text: 'Produtos, preços e avaliações', accent: true },
     { key: 'favoritos', onClick: () => goTo('favoritos'), Icon: Heart, title: 'Meus favoritos', text: liked.length ? `${liked.length} ${liked.length === 1 ? 'produto guardado' : 'produtos guardados'}` : 'Nenhum produto ainda' },
     { key: 'acesso', onClick: () => goTo('acesso'), Icon: LockKeyhole, title: 'E-mail e senha', text: 'Altere seus dados de acesso' },
     { key: 'whats', href: whatsappLink(helloMessage), Icon: WhatsApp, title: 'Fale com a Artes com Fé', text: 'Tire dúvidas pelo WhatsApp' },
@@ -335,7 +332,7 @@ export default function Account() {
           <div className="acc-hero-buttons">
             <button type="button" className="button dark small" onClick={avatar.pick} disabled={avatar.busy}><Camera /> {avatar.busy ? 'Enviando…' : 'Alterar foto'}</button>
             {isAdmin
-              ? <a className="button outline small" href={PANEL_URL} target="_blank" rel="noreferrer"><LayoutGrid /> Painel da loja</a>
+              ? <Link className="button outline small" to="/painel-loja"><LayoutGrid /> Painel da loja</Link>
               : <Link className="button outline small" to="/produtos"><Heart /> Ver produtos</Link>}
           </div>
         </div>
